@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">FoodManager</string>
+    <string name="placeholder_product_name">"Product Name"</string>
+    <string name="placeholder_barcode_number">"Barcode Number"</string>
+    <string name="placeholder_expiry_date">"Expiry Date"</string>
+    <string name="camera_access_reminder">"Aby skorzystać z funkcji skanowania kodów kreskowych i daty przydatności do spożycia, zezwól aplikacji na dostęp do kamery."</string>
+    <string name="auto_switch">Auto</string>
+    <string name="save_new_button">Add</string>
+    <string name="Scan">Scan</string>
+    <string name="Home">Home</string>
+    <string name="Settings">Setting</string>
+</resources>

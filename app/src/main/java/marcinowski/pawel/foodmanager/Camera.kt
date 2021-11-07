@@ -1,0 +1,169 @@
+package marcinowski.pawel.foodmanager
+
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.SurfaceTexture
+import android.hardware.camera2.*
+import android.hardware.camera2.params.OutputConfiguration
+import android.hardware.camera2.params.SessionConfiguration
+import android.media.ImageReader
+import android.os.*
+import android.util.Size
+import android.view.TextureView
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.util.concurrent.HandlerExecutor
+import java.util.*
+
+class Camera(
+    private var activity: MainActivity,
+    private var context: Context,
+    private var textureViewRef: Reference<TextureView?>
+) {
+
+    val REQUEST_CAMERA_PERMISSION = 200
+
+    lateinit var cameraId: String
+    protected var cameraDevice: CameraDevice? = null
+    protected var cameraCaptureSessions: CameraCaptureSession? = null
+    protected var captureRequestBuilder: CaptureRequest.Builder? = null
+    private var imageDimension: Size? = null
+    private var imageReader: ImageReader? = null
+
+    fun openCamera() {
+        val manager = context.getSystemService(ComponentActivity.CAMERA_SERVICE) as CameraManager
+
+        try {
+            cameraId = manager.cameraIdList[0]
+            val characteristics = manager.getCameraCharacteristics(cameraId)
+            val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+            for (size in map.getOutputSizes(SurfaceTexture::class.java)) {
+                if (size.height * 16 == size.width * 9) {
+                    imageDimension = size
+                    break
+                }
+            }
+
+
+            //imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
+            // Add permission for camera and let user grant the permission
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    activity,
+                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    REQUEST_CAMERA_PERMISSION
+                )
+                return
+            }
+            manager.openCamera(cameraId, stateCallback, null)
+        } catch (e: CameraAccessException) {
+            e.printStackTrace()
+        }
+    }
+
+
+
+    fun closeCamera() {
+        if (null != cameraDevice) {
+            cameraDevice!!.close()
+            cameraDevice = null
+        }
+        if (null != imageReader) {
+            imageReader!!.close()
+            imageReader = null
+        }
+    }
+
+
+
+    private val stateCallback: CameraDevice.StateCallback = object : CameraDevice.StateCallback() {
+        override fun onOpened(camera: CameraDevice) {
+            //This is called when the camera is open
+            cameraDevice = camera
+            createCameraPreview()
+        }
+
+        override fun onDisconnected(camera: CameraDevice) {
+            cameraDevice!!.close()
+        }
+
+        override fun onError(camera: CameraDevice, error: Int) {
+            cameraDevice!!.close()
+            cameraDevice = null
+        }
+    }
+
+    protected fun createCameraPreview() {
+        try {
+            val texture = textureViewRef.value!!.surfaceTexture!!
+            texture.setDefaultBufferSize(imageDimension!!.width, imageDimension!!.height)
+            val surface = android.view.Surface(texture)
+            captureRequestBuilder =
+                cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            captureRequestBuilder!!.addTarget(surface)
+
+
+            cameraDevice!!.createCaptureSession(
+                SessionConfiguration(
+                    SessionConfiguration.SESSION_REGULAR,
+                    Arrays.asList(OutputConfiguration(surface)),
+                    HandlerExecutor(activity.mBackgroundHandler!!.looper),
+                    object : CameraCaptureSession.StateCallback() {
+                        override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
+                            //The camera is already closed
+                            if (null == cameraDevice) {
+                                return
+                            }
+                            // When the session is ready, we start displaying the preview.
+                            cameraCaptureSessions = cameraCaptureSession
+                            updatePreview()
+                        }
+
+                        override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
+//                            Toast.makeText(
+//                                activity,
+//                                "Configuration change",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+                        }
+                    }
+                )
+            )
+
+        } catch (e: CameraAccessException) {
+            e.printStackTrace()
+        }
+    }
+
+    protected fun updatePreview() {
+        //if (null == cameraDevice) {
+        //}
+        captureRequestBuilder!!.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+        try {
+
+
+
+            cameraCaptureSessions!!.setRepeatingRequest(
+                captureRequestBuilder!!.build(),
+                null,
+                activity.mBackgroundHandler
+            )
+        } catch (e: CameraAccessException) {
+            e.printStackTrace()
+        }
+    }
+
+
+
+}
