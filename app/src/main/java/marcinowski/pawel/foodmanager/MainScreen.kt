@@ -1,86 +1,113 @@
 package marcinowski.pawel.foodmanager
 
 import android.view.TextureView
+import androidx.activity.compose.BackHandler
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import kotlinx.coroutines.launch
 
+
+@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun MainScreen(textureViewRef: Reference<TextureView?>, camera: Camera) {
-    val navController = rememberNavController()
+fun MainScreen(
+    textureViewRef: Reference<TextureView?>,
+    camera: Camera,
+    pagerState: PagerState) {
+
+
+
+
+    val previousRoute = rememberSaveable { mutableStateOf(1) }
+    val currentRoute = rememberSaveable { mutableStateOf(1) }
+
+
+
+
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavigationBar(pagerState, previousRoute, currentRoute, camera) }
     ) {
-        Navigation(navController = navController, textureViewRef, camera)
+
+        HorizontalPager(count = 3, state = pagerState) {page ->
+            when (page) {
+                0 -> {
+                    ScanScreen(camera)
+                }
+                1 -> {
+                    HomeScreen()
+                }
+                2 -> {
+                    SettingsScreen()
+                }
+            }
+        }
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(
+    pagerState: PagerState,
+    previousRoute: MutableState<Int>,
+    currentRoute: MutableState<Int>,
+    camera: Camera
+) {
     val items = listOf(
         NavigationItem.Scan,
         NavigationItem.Home,
         NavigationItem.Settings
     )
     BottomNavigation(
-        backgroundColor = MaterialTheme.colors.background,
+        backgroundColor = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.onBackground
     ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+
+        if(currentRoute.value != pagerState.currentPage) {
+
+            if (pagerState.currentPage == 0)
+                camera.openCamera()
+            else
+                camera.closeCamera()
+
+            previousRoute.value = currentRoute.value
+        }
+        currentRoute.value = pagerState.currentPage
+        val scope = rememberCoroutineScope()
+
+
+        BackHandler(enabled = currentRoute.value != 1) {
+            scope.launch{
+                if (previousRoute.value != currentRoute.value) {
+                    pagerState.animateScrollToPage(previousRoute.value)
+                    currentRoute.value = previousRoute.value
+                }
+                else
+                    pagerState.animateScrollToPage(1)
+            }
+        }
+
         items.forEach { item ->
             BottomNavigationItem(
                 icon = { Icon(painterResource(id = item.icon), contentDescription = stringResource(id = item.title)) },
                 label = { Text(text = stringResource(id = item.title)) },
-                //selectedContentColor = Color.White,
-                //unselectedContentColor = Color.White.copy(0.4f),
                 alwaysShowLabel = true,
-                selected = currentRoute == item.route,
+                selected = currentRoute.value == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        // Pop up to the start destination of the graph to
-                        // avoid building up a large stack of destinations
-                        // on the back stack as users select items
-                        navController.graph.startDestinationRoute?.let { route ->
-                            popUpTo(route) {
-                                saveState = true
-                            }
+                    if (item.route != currentRoute.value) {
+                        scope.launch {
+                            pagerState.animateScrollToPage(item.route)
                         }
-                        // Avoid multiple copies of the same destination when
-                        // reselecting the same item
-                        launchSingleTop = true
-                        // Restore state when reselecting a previously selected item
-                        restoreState = true
                     }
                 }
             )
-        }
-    }
-}
-
-@Composable
-fun Navigation(
-    navController: NavHostController,
-    textureViewRef: Reference<TextureView?>,
-    camera: Camera
-) {
-    NavHost(navController, startDestination = NavigationItem.Home.route) {
-        composable(NavigationItem.Scan.route) {
-            ScanScreen(textureViewRef, camera)
-        }
-        composable(NavigationItem.Home.route) {
-            HomeScreen()
-        }
-        composable(NavigationItem.Settings.route) {
-            SettingsScreen()
         }
     }
 }

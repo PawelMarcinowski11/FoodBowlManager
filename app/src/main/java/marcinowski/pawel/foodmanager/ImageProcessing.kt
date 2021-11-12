@@ -3,57 +3,91 @@ package marcinowski.pawel.foodmanager
 import android.graphics.Bitmap
 import android.graphics.SurfaceTexture
 import android.view.TextureView
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.sync.Semaphore
 import kotlin.concurrent.thread
 
-class ImageProcessing(private var camera: Camera,
-                      private var textureViewRef: Reference<TextureView?>) {
-
-    private var isProcessing : Reference<Boolean> = Reference(false)
-    private var isProcessingNew : Semaphore = Semaphore(1)
-
-    var textureListener: TextureView.SurfaceTextureListener = object :
-        TextureView.SurfaceTextureListener {
-        override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-            //open your camera here
-            camera.openCamera()
-        }
-
-        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
-            // Transform you image captured size according to the surface width and height
-        }
-
-        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
-            return false
-        }
-
-        override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {
-            // Start changes
-            // Get the bitmap
+class ImageProcessing(
+    private var textureViewRef: TextureView?,
+    productParameters: ProductParameters
+) {
 
 
+    private var isProcessing : Semaphore
 
-            // Do whatever you like with the frame
-            //frameProcessor?.processFrame(frame)
+    var textureListener: TextureView.SurfaceTextureListener
 
+    init {
+        this.isProcessing = Semaphore(1)
+        this.textureListener = object :
+            TextureView.SurfaceTextureListener {
+            override fun onSurfaceTextureAvailable(
+                surface: SurfaceTexture,
+                width: Int,
+                height: Int
+            ) {
 
-            //async { isProcessingNew.withPermit {  }}
-
-            if(isProcessing.value == false /* ||isProcessingNew.tryAcquire()*/) {
-                isProcessing.value = true
-                thread {
-                    val frame = Bitmap.createBitmap(textureViewRef.value!!.width, textureViewRef.value!!.height, Bitmap.Config.ARGB_8888)
-                    textureViewRef.value!!.getBitmap(frame)
-                    //decodeImage(frame,isProcessing)
-                    //isProcessingNew.release()
-                }
-
-
-                //val promise = launch(CommonPool1) {
-                //    asyncDecode(frame,isProcessing)
-                //}
             }
-            // End changes
+
+            override fun onSurfaceTextureSizeChanged(
+                surface: SurfaceTexture,
+                width: Int,
+                height: Int
+            ) {
+
+            }
+
+            override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
+                return true
+            }
+
+            override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {
+                if (isProcessing.tryAcquire()) {
+                    thread {
+                        if (textureViewRef != null) {
+                            val frame = Bitmap.createBitmap(
+                                textureViewRef!!.width,
+                                textureViewRef!!.height,
+                                Bitmap.Config.ARGB_8888
+                            )
+
+                            val bitmap = textureViewRef!!.getBitmap(frame)
+
+//                            val options = BarcodeScannerOptions.Builder()
+//                                .setBarcodeFormats(
+//                                    Barcode.FORMAT_QR_CODE,
+//                                    Barcode.FORMAT_AZTEC)
+//                                .build()
+
+                            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                            val result = recognizer.process(InputImage.fromBitmap(bitmap, 0))
+                                .addOnSuccessListener { visionText ->
+                                    //productParameters.productName.value = visionText.text
+
+                                    var datePattern = Regex("""[0-3]\d[.][0-1]\d[.][2][0]\d\d""")
+                                    var trimmedResult = datePattern.find(visionText.text)?.value
+
+                                    if(trimmedResult != null)
+                                        productParameters.productName.value = trimmedResult
+
+
+                                    //var xd2 = visionText.textBlocks[0]
+                                    // Task completed successfully
+                                    // ...
+                                    isProcessing.release()
+                                }
+                                .addOnFailureListener { e ->
+                                    // Task failed with an exception
+                                    // ...
+                                    isProcessing.release()
+                                }
+
+                        }
+                    }
+                }
+            }
         }
     }
 }

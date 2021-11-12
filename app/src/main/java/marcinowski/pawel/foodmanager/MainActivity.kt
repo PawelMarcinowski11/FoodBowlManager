@@ -2,7 +2,6 @@ package marcinowski.pawel.foodmanager
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.hardware.camera2.*
 import android.media.ImageReader
 import android.os.Bundle
@@ -15,25 +14,29 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.*
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import com.google.firebase.ml.vision.objects.FirebaseVisionObject
-import com.google.firebase.ml.vision.objects.FirebaseVisionObjectDetectorOptions
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
 import marcinowski.pawel.foodmanager.ui.theme.FoodManagerTheme
 import java.io.File
 import java.util.*
 
-
 class MainActivity : ComponentActivity() {
 
+    @OptIn(ExperimentalPagerApi::class)
+    var pagerState: PagerState? = null
+
+    @OptIn(ExperimentalPagerApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FoodManagerTheme {
-                // A surface container using the 'background' color from the theme
+                pagerState = rememberPagerState(initialPage = 1)
+
                 Surface(color = MaterialTheme.colors.background) {
-                    MainScreen(textureView, camera)
+                    MainScreen(textureView, camera, pagerState!!)
                 }
+
             }
         }
         checkAndRequestPermissionsFor(arrayListOf(UserPermission.CAMERA, UserPermission.WRITE_DATA))
@@ -45,12 +48,11 @@ class MainActivity : ComponentActivity() {
         WRITE_DATA
     }
 
+    private val camera = Camera(this, this)
+
     private var count = 0
 
     private var textureView: Reference<TextureView?> = Reference(null)
-
-    private var camera = Camera(this, this, textureView)
-
 
     lateinit var cameraId: String
     protected var cameraDevice: CameraDevice? = null
@@ -62,17 +64,6 @@ class MainActivity : ComponentActivity() {
     public var mBackgroundHandler: Handler? = null
     private var mBackgroundThread: HandlerThread? = null
     private data class referenceBool (var value: Boolean)
-
-
-
-
-
-
-    suspend private fun asyncDecode(frame: Bitmap, isProcessing: referenceBool) {
-        //decodeImage(frame)
-        isProcessing.value = false
-    }
-
 
 
 
@@ -125,18 +116,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalPagerApi::class)
     override fun onResume() {
         super.onResume()
         startBackgroundThread()
-        if (textureView.value?.isAvailable == true) {
-            camera.openCamera()
-        } else {
-            textureView.value?.surfaceTextureListener = ImageProcessing(camera, textureView).textureListener
+
+        if (pagerState?.currentPage == 0) {
+            //if (textureView.value?.isAvailable == true)
+                camera.openCamera()
         }
     }
 
+    @OptIn(ExperimentalPagerApi::class)
     override fun onPause() {
-        camera.closeCamera();
+        if (pagerState?.currentPage == 0) {
+            camera.closeCamera();
+        }
         stopBackgroundThread()
         super.onPause()
     }
@@ -155,65 +150,7 @@ class MainActivity : ComponentActivity() {
 
 
 
-    private fun decodeImage(img: Bitmap, isProcessing: referenceBool){
 
-        val image = FirebaseVisionImage.fromBitmap(img)
-
-        val options = FirebaseVisionObjectDetectorOptions.Builder()
-            .setDetectorMode(FirebaseVisionObjectDetectorOptions.SINGLE_IMAGE_MODE)
-            .enableMultipleObjects()
-            .enableClassification()
-            .build()
-
-        val detector = FirebaseVision.getInstance().getOnDeviceObjectDetector(options)
-
-        detector.processImage(image)
-            .addOnSuccessListener {
-                // Task completed successfully
-                Toast.makeText(baseContext, "Cos jest: " + count,
-                    Toast.LENGTH_SHORT).show()
-                setValuesToTextView(it)
-                //detector.close()
-                isProcessing.value = false
-            }
-            .addOnFailureListener {
-                // Task failed with an exception
-                Toast.makeText(baseContext, "Oops, something went wrong!",
-                    Toast.LENGTH_SHORT).show()
-                //detector.close()
-                isProcessing.value = false
-            }
-
-
-
-
-    }
-
-    private fun setValuesToTextView(visionObjects : List<FirebaseVisionObject>) {
-        for ((idx, obj) in visionObjects.withIndex()) {
-            val box = obj.boundingBox
-            var categoryName :String = ""
-            if (obj.classificationCategory != FirebaseVisionObject.CATEGORY_UNKNOWN) {
-                val confidence: Int = obj.classificationConfidence!!.times(100).toInt()
-                when(obj.classificationCategory)
-                {
-                    FirebaseVisionObject.CATEGORY_FOOD->   categoryName = "food"
-                    FirebaseVisionObject.CATEGORY_PLACE->   categoryName = "place"
-                    FirebaseVisionObject.CATEGORY_FASHION_GOOD->   categoryName = "fashion food"
-                    FirebaseVisionObject.CATEGORY_HOME_GOOD->   categoryName = "home good"
-                    FirebaseVisionObject.CATEGORY_UNKNOWN->   categoryName = "unknown"
-                    FirebaseVisionObject.CATEGORY_PLANT->   categoryName = "plant"
-
-                }
-                Toast.makeText(baseContext, "Detected object: ${idx}\n" + "Category: ${obj.classificationCategory}\n"
-                        + "trackingId: ${obj.trackingId}\n"
-                        + "boundingBox: (${box.left}, ${box.top}) - (${box.right},${box.bottom})\n"
-                        + "Confidence: ${confidence}%\n" + "Category Label is : ${categoryName}"
-                    ,
-                    Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
     /***
      *      _____                    _         _

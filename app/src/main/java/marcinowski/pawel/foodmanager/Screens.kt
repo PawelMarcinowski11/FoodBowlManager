@@ -1,6 +1,5 @@
 package marcinowski.pawel.foodmanager
 
-import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.TextureView
@@ -8,24 +7,33 @@ import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+
+data class ProductParameters (
+    var productName: MutableState<String> = mutableStateOf(""),
+    var barcodeNumber: String = "",
+    var expiryDate: String = ""
+)
 
 @Composable
 fun HomeScreen() {
     Scaffold(modifier = Modifier.background(color= Color.Gray)) {
-
         Text(
             text = "Tu będzie lista produktów",
             textAlign = TextAlign.Center,
@@ -34,39 +42,33 @@ fun HomeScreen() {
 }
 
 @Composable
-fun ScanScreen(textureViewRef: Reference<TextureView?>, camera: Camera) {
-    HandleDisposal(camera)
-    BackgroundCamera(textureViewRef, camera)
+fun ScanScreen(camera: Camera) {
+
+    var productParameters = ProductParameters()
+
+    BackgroundCamera(camera, productParameters)
     Column() {
-        InputsCard()
+        InputsCard(productParameters)
     }
 }
 
 @Composable
-fun HandleDisposal (camera: Camera) {
-    LaunchedEffect(Unit) {
-    }
-    DisposableEffect(Unit) {
-        onDispose {
-            camera.closeCamera();
-        }
-    }
-}
-
-@Composable
-fun InputsCard() {
+private fun InputsCard(params: ProductParameters) {
     Card(shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)) {
         Column(modifier = Modifier
             .padding(bottom = 10.dp, top = 6.dp)) {
-            TopRow()
-            MiddleRow()
-            BottomRow()
+            TopRow(params)
+            MiddleRow(params)
+            BottomRow(params)
         }
     }
 }
 
 @Composable
-fun BackgroundCamera(textureViewRef: Reference<TextureView?>, camera: Camera) {
+private fun BackgroundCamera(
+    camera: Camera,
+    params: ProductParameters
+) {
     Box() {
         Box(
             modifier = Modifier
@@ -84,15 +86,12 @@ fun BackgroundCamera(textureViewRef: Reference<TextureView?>, camera: Camera) {
                 val view = LayoutInflater.from(context)
                     .inflate(R.layout.camera_view, null, false)
 
-                textureViewRef.value = view.findViewById<View>(R.id.texture) as TextureView
+                var textureView = view.findViewById<View>(R.id.texture) as TextureView
 
-
-                if (textureViewRef.value?.isAvailable == true) {
-                    camera.openCamera()
-                } else {
-                    textureViewRef.value?.surfaceTextureListener = ImageProcessing(camera, textureViewRef).textureListener
+                if (textureView.isAvailable == false) {
+                    camera.textureViewRef = textureView
+                    textureView.surfaceTextureListener = ImageProcessing(textureView, params).textureListener
                 }
-
 
                 // do whatever you want...
                 view // return the view
@@ -106,55 +105,52 @@ fun BackgroundCamera(textureViewRef: Reference<TextureView?>, camera: Camera) {
 }
 
 @Composable
-fun TopRow() {
+private fun TopRow(productParameters: ProductParameters) {
     Row(modifier = Modifier
         .wrapContentSize(Alignment.Center)) {
 
-        var productName by remember { mutableStateOf("") }
 
-        OutlinedTextField(
-            value = productName,
-            onValueChange = { productName = it },
-            singleLine = true,
-            placeholder = { Text(stringResource(R.string.placeholder_product_name)) },
+        SlimTextField(
+            value = productParameters.productName.value,
+            onValueChange = { productParameters.productName.value = it },
             textStyle = TextStyle(fontWeight = FontWeight.Bold),
             modifier = Modifier
                 .padding(start = 9.dp, end = 2.dp)
-                .height(54.dp)
-                .fillMaxWidth(0.7f),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = MaterialTheme.colors.secondary.copy(0.12f),
-                unfocusedBorderColor = MaterialTheme.colors.secondary.copy(0f),
-                )
+                .height(40.dp)
+                .fillMaxWidth(0.7f)
+                .background(
+                    MaterialTheme.colors.secondary.copy(0.08f),
+                    MaterialTheme.shapes.small,
+                ),
+            placeholderText = stringResource(R.string.placeholder_product_name)
         )
     }
 }
 
 @Composable
-fun MiddleRow() {
+private fun MiddleRow(productParameters: ProductParameters) {
     Row(modifier = Modifier
         .padding(top = 10.dp)
         .wrapContentSize(Alignment.Center)) {
 
-        var barcodeNumber by remember { mutableStateOf("") }
-
-        OutlinedTextField(value = barcodeNumber,
-            onValueChange = { barcodeNumber = it },
-            singleLine = true,
-            placeholder = { Text(stringResource(R.string.placeholder_barcode_number)) },
+        SlimTextField(
+            value = productParameters.barcodeNumber,
+            onValueChange = { productParameters.barcodeNumber = it },
             textStyle = TextStyle(fontWeight = FontWeight.Bold),
             modifier = Modifier
-                .padding(start = 10.dp, end = 2.dp)
-                .height(54.dp)
-                .fillMaxWidth(0.7f),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = MaterialTheme.colors.secondary.copy(0.12f),
-                unfocusedBorderColor = MaterialTheme.colors.secondary.copy(0f)
-            )
+                .padding(start = 9.dp, end = 2.dp)
+                .height(40.dp)
+                .fillMaxWidth(0.7f)
+                .background(
+                    MaterialTheme.colors.secondary.copy(0.08f),
+                    MaterialTheme.shapes.small,
+                ),
+            placeholderText = stringResource(R.string.placeholder_barcode_number)
         )
 
         Box(modifier = Modifier
             .fillMaxWidth()
+            .height(40.dp)
             .align(Alignment.CenterVertically)) {
             Button(
                 onClick = { /*TODO*/ },
@@ -173,28 +169,33 @@ fun MiddleRow() {
     }
 }
 
+fun xd(x : Reference<String>) {
+    x.value = "lol"
+}
+
+
 @Composable
-fun BottomRow() {
+private fun BottomRow(productParameters: ProductParameters) {
     Row(modifier = Modifier
         .padding(top = 10.dp)
         .wrapContentSize(Alignment.Center)) {
 
-        var expiryDate by remember { mutableStateOf("") }
 
-        OutlinedTextField(value = expiryDate,
-            onValueChange = { expiryDate = it },
-            singleLine = true,
-            placeholder = { Text(stringResource(R.string.placeholder_expiry_date)) },
 
+
+        SlimTextField(
+            value = productParameters.expiryDate,
+            onValueChange = { productParameters.expiryDate = it },
             textStyle = TextStyle(fontWeight = FontWeight.Bold),
             modifier = Modifier
                 .padding(start = 9.dp, end = 2.dp)
-                .height(54.dp)
-                .fillMaxWidth(0.7f),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = MaterialTheme.colors.secondary.copy(0.12f),
-                unfocusedBorderColor = MaterialTheme.colors.secondary.copy(0f)
-            )
+                .height(40.dp)
+                .fillMaxWidth(0.7f)
+                .background(
+                    MaterialTheme.colors.secondary.copy(0.08f),
+                    MaterialTheme.shapes.small,
+                ),
+            placeholderText = stringResource(R.string.placeholder_expiry_date)
         )
 
         Box(modifier = Modifier
@@ -205,7 +206,7 @@ fun BottomRow() {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(bottom = 1.dp, start = 10.dp))
+                    .padding(bottom = 2.dp, start = 10.dp))
 
             val isChecked = remember { mutableStateOf(false) }
 
@@ -215,9 +216,10 @@ fun BottomRow() {
                     isChecked.value = checked
                 },
                 modifier = Modifier
+                    .height(40.dp)
                     .scale(1.0f)
                     .align(Alignment.CenterEnd)
-                    .padding(top = 2.dp, bottom = 1.dp, start = 8.dp, end = 10.dp)
+                    .padding(start = 8.dp, end = 10.dp)
             )
         }
     }
@@ -227,5 +229,44 @@ fun BottomRow() {
 fun SettingsScreen() {
     Text(
         text = "Ustawienia"
+    )
+}
+
+
+
+
+@Composable
+private fun SlimTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: @Composable() (() -> Unit)? = null,
+    trailingIcon: @Composable() (() -> Unit)? = null,
+    placeholderText: String,
+    textStyle: TextStyle = LocalTextStyle.current,
+) {
+    BasicTextField(modifier = modifier,
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        cursorBrush = SolidColor(MaterialTheme.colors.primary),
+        textStyle = textStyle,
+        decorationBox = { innerTextField ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (leadingIcon != null) leadingIcon()
+                Box(Modifier.padding(horizontal = 16.dp)) {
+                    if (value.isEmpty()) Text(
+                        placeholderText,
+                        style = LocalTextStyle.current.copy(
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                    )
+                    innerTextField()
+                }
+                if (trailingIcon != null) trailingIcon()
+            }
+        }
     )
 }

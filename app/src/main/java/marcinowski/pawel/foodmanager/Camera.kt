@@ -1,7 +1,6 @@
 package marcinowski.pawel.foodmanager
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.SurfaceTexture
@@ -9,20 +8,17 @@ import android.hardware.camera2.*
 import android.hardware.camera2.params.OutputConfiguration
 import android.hardware.camera2.params.SessionConfiguration
 import android.media.ImageReader
-import android.os.*
+import android.os.Looper
 import android.util.Size
 import android.view.TextureView
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import java.util.*
 
 class Camera(
     private var activity: MainActivity,
-    private var context: Context,
-    private var textureViewRef: Reference<TextureView?>
+    private var context: Context
 ) {
 
     val REQUEST_CAMERA_PERMISSION = 200
@@ -34,47 +30,52 @@ class Camera(
     private var imageDimension: Size? = null
     private var imageReader: ImageReader? = null
 
+    public var textureViewRef: TextureView? = null
+
     fun openCamera() {
         val manager = context.getSystemService(ComponentActivity.CAMERA_SERVICE) as CameraManager
 
-        try {
-            cameraId = manager.cameraIdList[0]
-            val characteristics = manager.getCameraCharacteristics(cameraId)
-            val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
-            for (size in map.getOutputSizes(SurfaceTexture::class.java)) {
-                if (size.height * 16 == size.width * 9) {
-                    imageDimension = size
-                    break
+            try {
+                cameraId = manager.cameraIdList[0]
+                val characteristics = manager.getCameraCharacteristics(cameraId)
+                val resolutions =
+                    characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+                for (resolution in resolutions.getOutputSizes(SurfaceTexture::class.java)) {
+                    if (resolution.height * 16 == resolution.width * 9) {
+                        imageDimension = resolution
+                        break
+                    }
                 }
-            }
 
 
             //imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
             // Add permission for camera and let user grant the permission
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    activity,
-                    arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    REQUEST_CAMERA_PERMISSION
-                )
-                return
-            }
-            manager.openCamera(cameraId, stateCallback, null)
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        REQUEST_CAMERA_PERMISSION
+                    )
+                    return
+                }
+                manager.openCamera(cameraId, stateCallback, null)
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
+        textureViewRef?.alpha = 1.0f
     }
 
 
 
     fun closeCamera() {
+        textureViewRef?.alpha = 0f
         if (null != cameraDevice) {
             cameraDevice!!.close()
             cameraDevice = null
@@ -95,18 +96,18 @@ class Camera(
         }
 
         override fun onDisconnected(camera: CameraDevice) {
-            cameraDevice!!.close()
+            cameraDevice?.close()
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
-            cameraDevice!!.close()
+            cameraDevice?.close()
             cameraDevice = null
         }
     }
 
     protected fun createCameraPreview() {
         try {
-            val texture = textureViewRef.value!!.surfaceTexture!!
+            val texture = textureViewRef?.surfaceTexture!!
             texture.setDefaultBufferSize(imageDimension!!.width, imageDimension!!.height)
             val surface = android.view.Surface(texture)
             captureRequestBuilder =
@@ -118,7 +119,7 @@ class Camera(
                 SessionConfiguration(
                     SessionConfiguration.SESSION_REGULAR,
                     Arrays.asList(OutputConfiguration(surface)),
-                    HandlerExecutor(activity.mBackgroundHandler!!.looper),
+                    HandlerExecutor(Looper.getMainLooper()),
                     object : CameraCaptureSession.StateCallback() {
                         override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
                             //The camera is already closed
@@ -131,17 +132,12 @@ class Camera(
                         }
 
                         override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
-//                            Toast.makeText(
-//                                activity,
-//                                "Configuration change",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
                         }
                     }
                 )
             )
 
-        } catch (e: CameraAccessException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
@@ -151,12 +147,10 @@ class Camera(
         //}
         captureRequestBuilder!!.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
         try {
-
-
-
             cameraCaptureSessions!!.setRepeatingRequest(
                 captureRequestBuilder!!.build(),
                 null,
+                //Handler(Looper.getMainLooper())
                 activity.mBackgroundHandler
             )
         } catch (e: CameraAccessException) {
