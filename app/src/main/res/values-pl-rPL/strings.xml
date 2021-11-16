@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FoodManager</string>
+    <string name="app_name">FoodBowlManager</string>
     <string name="placeholder_product_name">Nazwa</string>
     <string name="placeholder_barcode_number">Kod kreskowy</string>
     <string name="placeholder_expiry_date">Data przydatności do spożycia</string>
-    <string name="camera_access_reminder">Aby skorzystać z funkcji skanowania kodów kreskowych i daty przydatności do spożycia, zezwól aplikacji na dostęp do kamery.</string>
-    <string name="auto_switch">Auto</string>
-    <string name="save_new_button">Dodaj</string>
-    <string name="Scan">Skan</string>
-    <string name="Home">Produkty</string>
-    <string name="Settings">Ustawienia</string>
+    <string name="access_reminder_camera">Aby skorzystać z funkcji skanowania kodów kreskowych i daty przydatności do spożycia, zezwól aplikacji na dostęp do kamery.</string>
+    <string name="switch_auto_complete">Auto</string>
+    <string name="button_save_new">Dodaj</string>
+    <string name="label_scan">Skan</string>
+    <string name="label_home">Produkty</string>
+    <string name="label_settings">Ustawienia</string>
+    <string name="toast_product_not_found">Nie znaleziono nazwy produktu o danym kodzie kreskowym</string>
 </resources>

@@ -12,12 +12,12 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -27,8 +27,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 data class ProductParameters (
     var productName: MutableState<String> = mutableStateOf(""),
-    var barcodeNumber: String = "",
-    var expiryDate: String = ""
+    var barcodeNumber: MutableState<String> = mutableStateOf(""),
+    var expiryDate: MutableState<String> = mutableStateOf(""),
+    var autoComplete: MutableState<Boolean> = mutableStateOf(true)
+
 )
 
 @Composable
@@ -75,7 +77,7 @@ private fun BackgroundCamera(
                 .fillMaxSize()
         )
         Text(
-            text = stringResource(R.string.camera_access_reminder),
+            text = stringResource(R.string.access_reminder_camera),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.Center)
@@ -90,7 +92,7 @@ private fun BackgroundCamera(
 
                 if (textureView.isAvailable == false) {
                     camera.textureViewRef = textureView
-                    textureView.surfaceTextureListener = ImageProcessing(textureView, params).textureListener
+                    textureView.surfaceTextureListener = ImageProcessing(textureView, params, context).textureListener
                 }
 
                 // do whatever you want...
@@ -109,10 +111,9 @@ private fun TopRow(productParameters: ProductParameters) {
     Row(modifier = Modifier
         .wrapContentSize(Alignment.Center)) {
 
-
         SlimTextField(
             value = productParameters.productName.value,
-            onValueChange = { productParameters.productName.value = it },
+            onValueChange = { productParameters.productName.value = it},
             textStyle = TextStyle(fontWeight = FontWeight.Bold),
             modifier = Modifier
                 .padding(start = 9.dp, end = 2.dp)
@@ -133,9 +134,22 @@ private fun MiddleRow(productParameters: ProductParameters) {
         .padding(top = 10.dp)
         .wrapContentSize(Alignment.Center)) {
 
+        val context = LocalContext.current
+
+
+
         SlimTextField(
-            value = productParameters.barcodeNumber,
-            onValueChange = { productParameters.barcodeNumber = it },
+            value = productParameters.barcodeNumber.value,
+            onValueChange = {
+                productParameters.barcodeNumber.value = it
+                if (productParameters.autoComplete.value == true) {
+                    lookUpProductName(
+                        productParameters.barcodeNumber.value,
+                        productParameters.productName,
+                        context
+                    );
+                }
+            },
             textStyle = TextStyle(fontWeight = FontWeight.Bold),
             modifier = Modifier
                 .padding(start = 9.dp, end = 2.dp)
@@ -149,30 +163,29 @@ private fun MiddleRow(productParameters: ProductParameters) {
         )
 
         Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .align(Alignment.CenterVertically)) {
-            Button(
-                onClick = { /*TODO*/ },
+            .align(Alignment.CenterVertically)
+            .fillMaxWidth()) {
+            Text(stringResource(R.string.switch_auto_complete),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(start = 9.dp, end = 12.dp)
-                    .fillMaxWidth(),
-            ) {
-                Text(
-                    stringResource(R.string.save_new_button),
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 1.dp)
-                )
-            }
+                    .align(Alignment.CenterStart)
+                    .padding(bottom = 2.dp, start = 10.dp))
+
+            Switch(
+                checked = productParameters.autoComplete.value,
+                onCheckedChange = { checked ->
+                    productParameters.autoComplete.value = checked
+                },
+                modifier = Modifier
+                    .height(40.dp)
+                    .scale(1.0f)
+                    .align(Alignment.CenterEnd)
+                    .padding(start = 8.dp, end = 10.dp)
+            )
         }
     }
 }
-
-fun xd(x : Reference<String>) {
-    x.value = "lol"
-}
-
 
 @Composable
 private fun BottomRow(productParameters: ProductParameters) {
@@ -184,8 +197,8 @@ private fun BottomRow(productParameters: ProductParameters) {
 
 
         SlimTextField(
-            value = productParameters.expiryDate,
-            onValueChange = { productParameters.expiryDate = it },
+            value = productParameters.expiryDate.value,
+            onValueChange = { productParameters.expiryDate.value = it },
             textStyle = TextStyle(fontWeight = FontWeight.Bold),
             modifier = Modifier
                 .padding(start = 9.dp, end = 2.dp)
@@ -198,29 +211,24 @@ private fun BottomRow(productParameters: ProductParameters) {
             placeholderText = stringResource(R.string.placeholder_expiry_date)
         )
 
+
         Box(modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .fillMaxWidth()) {
-            Text(stringResource(R.string.auto_switch),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
+            .fillMaxWidth()
+            .height(40.dp)
+            .align(Alignment.CenterVertically)) {
+            Button(
+                onClick = { /*TODO*/ },
                 modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(bottom = 2.dp, start = 10.dp))
-
-            val isChecked = remember { mutableStateOf(false) }
-
-            Switch(
-                checked = isChecked.value,
-                onCheckedChange = { checked ->
-                    isChecked.value = checked
-                },
-                modifier = Modifier
-                    .height(40.dp)
-                    .scale(1.0f)
-                    .align(Alignment.CenterEnd)
-                    .padding(start = 8.dp, end = 10.dp)
-            )
+                    .align(Alignment.Center)
+                    .padding(start = 9.dp, end = 12.dp)
+                    .fillMaxWidth(),
+            ) {
+                Text(
+                    stringResource(R.string.button_save_new),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 1.dp)
+                )
+            }
         }
     }
 }

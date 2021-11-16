@@ -1,12 +1,13 @@
 <resources>
-    <string name="app_name">FoodManager</string>
+    <string name="app_name">FoodBowlManager</string>
     <string name="placeholder_product_name">"Product Name"</string>
     <string name="placeholder_barcode_number">"Barcode Number"</string>
     <string name="placeholder_expiry_date">"Expiry Date"</string>
-    <string name="camera_access_reminder">"Aby skorzystać z funkcji skanowania kodów kreskowych i daty przydatności do spożycia, zezwól aplikacji na dostęp do kamery."</string>
-    <string name="auto_switch">Auto</string>
-    <string name="save_new_button">Add</string>
-    <string name="Scan">Scan</string>
-    <string name="Home">Home</string>
-    <string name="Settings">Setting</string>
+    <string name="access_reminder_camera">To use barcode and expiry date scanning, allow the app to access the camera.</string>
+    <string name="switch_auto_complete">Auto</string>
+    <string name="button_save_new">Add</string>
+    <string name="label_scan">Scan</string>
+    <string name="label_home">Products</string>
+    <string name="label_settings">Setting</string>
+    <string name="toast_product_not_found">No product name found for this barcode</string>
 </resources>

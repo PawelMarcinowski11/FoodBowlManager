@@ -36,7 +36,6 @@ class MainActivity : ComponentActivity() {
                 Surface(color = MaterialTheme.colors.background) {
                     MainScreen(textureView, camera, pagerState!!)
                 }
-
             }
         }
         checkAndRequestPermissionsFor(arrayListOf(UserPermission.CAMERA, UserPermission.WRITE_DATA))
