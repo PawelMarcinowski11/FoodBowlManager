@@ -14,6 +14,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.*
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
@@ -51,7 +53,7 @@ class MainActivity : ComponentActivity() {
 
     private var count = 0
 
-    private var textureView: Reference<TextureView?> = Reference(null)
+    private var textureView: MutableState<TextureView?> = mutableStateOf(null)
 
     lateinit var cameraId: String
     protected var cameraDevice: CameraDevice? = null

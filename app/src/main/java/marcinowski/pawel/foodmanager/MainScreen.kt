@@ -14,12 +14,15 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
+import marcinowski.pawel.foodmanager.screens.HomeScreen
+import marcinowski.pawel.foodmanager.screens.ScanScreen
+import marcinowski.pawel.foodmanager.screens.SettingsScreen
 
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun MainScreen(
-    textureViewRef: Reference<TextureView?>,
+    textureViewRef: MutableState<TextureView?>,
     camera: Camera,
     pagerState: PagerState) {
 

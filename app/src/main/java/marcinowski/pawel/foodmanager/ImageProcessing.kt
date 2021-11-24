@@ -70,10 +70,10 @@ class ImageProcessing(
                                 val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
                                 textRecognizer.process(inputImage)
                                     .addOnSuccessListener { visionText ->
-                                        val ddmmyyyyPattern = """[0-3]\d[.,\/](([0]\d)|([1][0-2]))[.,\/][2][0]\d\d"""
-                                        val ddmmyyPattern = """[0-3]\d[.,\/](([0]\d)|([1][0-2]))[.,\/]\d\d"""
-                                        val mmyyyyPattern = """^(([0]\d)|([1][0-2]))[.,\/][2][0]\d\d"""
-                                        val mmyyPattern = """^(([0]\d)|([1][0-2]))[.,\/]\d\d"""
+                                        val ddmmyyyyPattern = """[0-3]\d[.,/](([0]\d)|([1][0-2]))[.,/][2][0]\d\d"""
+                                        val ddmmyyPattern = """[0-3]\d[.,/](([0]\d)|([1][0-2]))[.,/]\d\d"""
+                                        val mmyyyyPattern = """^(([0]\d)|([1][0-2]))[.,/][2][0]\d\d"""
+                                        val mmyyPattern = """^(([0]\d)|([1][0-2]))[.,/]\d\d"""
 
                                         if (Regex(ddmmyyyyPattern).find(visionText.text)?.value != null) {
                                             val expiryDate = Regex(ddmmyyyyPattern).find(visionText.text)?.value!!
@@ -101,7 +101,7 @@ class ImageProcessing(
 
                                         isProcessingText.release()
                                     }
-                                    .addOnFailureListener { e ->
+                                    .addOnFailureListener {
                                         isProcessingText.release()
                                     }
 

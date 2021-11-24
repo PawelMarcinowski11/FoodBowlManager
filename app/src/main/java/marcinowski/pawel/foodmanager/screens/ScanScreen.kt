@@ -1,4 +1,4 @@
-package marcinowski.pawel.foodmanager
+package marcinowski.pawel.foodmanager.screens
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -10,12 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,24 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import marcinowski.pawel.foodmanager.*
+import marcinowski.pawel.foodmanager.R
 
-data class ProductParameters (
-    var productName: MutableState<String> = mutableStateOf(""),
-    var barcodeNumber: MutableState<String> = mutableStateOf(""),
-    var expiryDate: MutableState<String> = mutableStateOf(""),
-    var autoComplete: MutableState<Boolean> = mutableStateOf(true)
-
-)
-
-@Composable
-fun HomeScreen() {
-    Scaffold(modifier = Modifier.background(color= Color.Gray)) {
-        Text(
-            text = "Tu będzie lista produktów",
-            textAlign = TextAlign.Center,
-        )
-    }
-}
 
 @Composable
 fun ScanScreen(camera: Camera) {
@@ -95,9 +77,8 @@ private fun BackgroundCamera(
                     textureView.surfaceTextureListener = ImageProcessing(textureView, params, context).textureListener
                 }
 
-                // do whatever you want...
-                view // return the view
-            },// update  = { view -> textureViewRef.value = view.findViewById<View>(R.id.texture) as TextureView}
+                view
+            },
             modifier = Modifier
                 .wrapContentSize(Alignment.Center)
                 .padding(top = 60.dp)
@@ -142,7 +123,8 @@ private fun MiddleRow(productParameters: ProductParameters) {
             value = productParameters.barcodeNumber.value,
             onValueChange = {
                 productParameters.barcodeNumber.value = it
-                if (productParameters.autoComplete.value == true) {
+                if (productParameters.autoComplete.value == true
+                    && (it.length == 6 || it.length == 7 || it.length == 12)) {
                     lookUpProductName(
                         productParameters.barcodeNumber.value,
                         productParameters.productName,
