@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -32,31 +34,29 @@ fun ScanScreen(camera: Camera) {
 
     BackgroundCamera(camera, productParameters)
     Column() {
-        InputsCard(productParameters, Mode.Add)
+        InputsCard(productParameters, Mode.Add, {})
     }
 }
 
 enum class Mode {Add, Edit}
 
 @Composable
-fun InputsCard(params: ProductParameters, mode: Mode) {
+fun InputsCard(params: ProductParameters, mode: Mode, onClick: () -> Unit) {
     Card(shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)) {
-        Row {
-            Column(
-                modifier = Modifier
-                    .padding(bottom = 10.dp, top = 6.dp)
-            ) {
+        Row (
+            modifier = Modifier
+            .padding(bottom = 10.dp, top = 6.dp)
+        ) {
+            Column {
                 NameField(params)
                 BarcodeField(params)
-                ExpiryDateField(params, mode)
+                ExpiryDateField(params)
             }
             Column(
-                modifier = Modifier
-                    .padding(bottom = 10.dp, top = 6.dp)
-                    .align(Alignment.Bottom)
+                modifier = Modifier.align(Alignment.Bottom)
             ) {
-                AutoCompleteSwitch(params, mode)
-                SaveButton(params, mode)
+                AutoCompleteSwitch(params)
+                SaveButton(params, mode, onClick)
             }
         }
     }
@@ -125,6 +125,8 @@ private fun BarcodeField(productParameters: ProductParameters) {
     SlimTextField(
         value = productParameters.barcodeNumber.value,
         onValueChange = {
+            val barcodeFormat = """\A\d{0,12}\Z"""
+            if (Regex(barcodeFormat).matches(it))
             productParameters.barcodeNumber.value = it
             if (productParameters.autoComplete.value == true
                 && (it.length == 6 || it.length == 7 || it.length == 12)
@@ -145,12 +147,13 @@ private fun BarcodeField(productParameters: ProductParameters) {
                 MaterialTheme.colors.secondary.copy(0.08f),
                 MaterialTheme.shapes.small,
             ),
-        placeholderText = stringResource(R.string.placeholder_barcode_number)
+        placeholderText = stringResource(R.string.placeholder_barcode_number),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 }
 
 @Composable
-private fun AutoCompleteSwitch(productParameters: ProductParameters, mode: Mode) {
+private fun AutoCompleteSwitch(productParameters: ProductParameters) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .padding(bottom = 10.dp)) {
@@ -177,10 +180,14 @@ private fun AutoCompleteSwitch(productParameters: ProductParameters, mode: Mode)
 
 
 @Composable
-private fun ExpiryDateField(productParameters: ProductParameters, mode: Mode) {
+private fun ExpiryDateField(productParameters: ProductParameters) {
     SlimTextField(
         value = productParameters.expiryDate.value,
-        onValueChange = { productParameters.expiryDate.value = it },
+        onValueChange = {
+            val dateFormat = """\A\d{0,2}\Z|\A\d{1,2}[.]{1}\d{0,2}\Z|\A\d{1,2}[.]{1}\d{1,2}[.]{1}\d{0,4}\Z"""
+            if (Regex(dateFormat).matches(it))
+                productParameters.expiryDate.value = it
+        },
         textStyle = TextStyle(fontWeight = FontWeight.Bold),
         modifier = Modifier
             .padding(top = 10.dp, start = 9.dp, end = 2.dp)
@@ -190,23 +197,19 @@ private fun ExpiryDateField(productParameters: ProductParameters, mode: Mode) {
                 MaterialTheme.colors.secondary.copy(0.08f),
                 MaterialTheme.shapes.small,
             ),
-        placeholderText = stringResource(R.string.placeholder_expiry_date)
+        placeholderText = stringResource(R.string.placeholder_expiry_date),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 }
 
 @Composable
-fun SaveButton(productParameters: ProductParameters, mode: Mode) {
+fun SaveButton(productParameters: ProductParameters, mode: Mode, onClickEvent: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(40.dp)
     ) {
         Button(
-            onClick = {
-                if (mode == Mode.Add) {/*TODO*/
-                }
-                else {
-
-                }},
+            onClick = { onClickEvent() },
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(start = 9.dp, end = 12.dp)
@@ -243,6 +246,7 @@ fun SlimTextField(
     trailingIcon: @Composable() (() -> Unit)? = null,
     placeholderText: String,
     textStyle: TextStyle = LocalTextStyle.current,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     BasicTextField(modifier = modifier,
         value = value,
@@ -250,6 +254,7 @@ fun SlimTextField(
         singleLine = true,
         cursorBrush = SolidColor(MaterialTheme.colors.primary),
         textStyle = textStyle,
+        keyboardOptions = keyboardOptions,
         decorationBox = { innerTextField ->
             Row(
                 verticalAlignment = Alignment.CenterVertically

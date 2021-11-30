@@ -2,18 +2,24 @@ package marcinowski.pawel.foodmanager
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import java.util.*
+import java.time.LocalDate
 
 data class ProductParameters (
-    var productName: MutableState<String> = mutableStateOf(""),
-    var barcodeNumber: MutableState<String> = mutableStateOf(""),
-    var expiryDate: MutableState<String> = mutableStateOf(""),
-    var autoComplete: MutableState<Boolean> = mutableStateOf(true)
+    val productName: MutableState<String> = mutableStateOf(""),
+    val barcodeNumber: MutableState<String> = mutableStateOf(""),
+    val expiryDate: MutableState<String> = mutableStateOf(""),
+    val autoComplete: MutableState<Boolean> = mutableStateOf(true),
+    val id: MutableState<Int> = mutableStateOf(-1)
 )
 
 data class ProductEntry(
-    val name: String,
-    val id: Number,
-    val expiryDate: Date? = null
-)
+    var name: String,
+    val id: Int,
+    var expiryDate: LocalDate? = null
+) {
+    fun update(newName: String) {
+        name = newName
+        //TODO(Implement changing entry in local storage)
+    }
+}
 

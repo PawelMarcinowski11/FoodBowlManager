@@ -77,25 +77,25 @@ class ImageProcessing(
 
                                         if (Regex(ddmmyyyyPattern).find(visionText.text)?.value != null) {
                                             val expiryDate = Regex(ddmmyyyyPattern).find(visionText.text)?.value!!
-                                            productParameters.expiryDate.value = expiryDate
+                                            productParameters.expiryDate.value = expiryDate.replace('/', '.')
                                         }
                                         else if (Regex(ddmmyyPattern).find(visionText.text)?.value != null) {
                                             val expiryDate = Regex(ddmmyyPattern).find(visionText.text)?.value!!
-                                            productParameters.expiryDate.value = expiryDate.substring(0,6) + "20" + expiryDate.substring(6)
+                                            productParameters.expiryDate.value = expiryDate.substring(0,6).replace('/', '.') + "20" + expiryDate.substring(6).replace('/', '.')
                                         }
                                         else if (Regex(mmyyyyPattern).find(visionText.text)?.value != null) {
                                             val expiryDate = Regex(mmyyyyPattern).find(visionText.text)?.value!!
                                             if (expiryDate.contains('.'))
                                                 productParameters.expiryDate.value = "01." + expiryDate
                                             else if (expiryDate.contains('/'))
-                                                productParameters.expiryDate.value = "01/" + expiryDate
+                                                productParameters.expiryDate.value = "01." + expiryDate.replace('/', '.')
                                         }
                                         else if (Regex(mmyyPattern).find(visionText.text)?.value != null) {
                                             val expiryDate = Regex(mmyyPattern).find(visionText.text)?.value!!
                                             if (expiryDate.contains('.'))
                                                 productParameters.expiryDate.value = "01." + expiryDate.substring(0,3) + "20" + expiryDate.substring(3)
                                             else if (expiryDate.contains('/'))
-                                                productParameters.expiryDate.value = "01/" + expiryDate.substring(0,3) + "20" + expiryDate.substring(3)
+                                                productParameters.expiryDate.value = "01." + expiryDate.substring(0,3).replace('/', '.') + "20" + expiryDate.substring(3).replace('/', '.')
 
                                         }
 
