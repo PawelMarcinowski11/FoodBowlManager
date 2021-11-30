@@ -37,8 +37,6 @@ private val LightColorPalette = lightColors(
     onBackground = CharredDough, //napisy
     onSurface = Dough, //ramka przy TextForm, Switch off
 
-    /* Other default colors to override
-    */
 )
 
 @Composable
