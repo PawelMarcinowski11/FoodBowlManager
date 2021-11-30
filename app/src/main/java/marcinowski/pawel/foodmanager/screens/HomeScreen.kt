@@ -1,51 +1,74 @@
 package marcinowski.pawel.foodmanager.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.animateColorAsState
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.RestaurantMenu
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
-import java.util.*
+import marcinowski.pawel.foodmanager.ProductEntry
+import marcinowski.pawel.foodmanager.ProductParameters
 
-private var isDeleting: Semaphore = Semaphore(1)
+//private var isDeleting: Semaphore = Semaphore(1)
 
+val productParameters = ProductParameters()
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen() {
-    Scaffold(modifier = Modifier.background(color = Color.Gray)) {
-        ProductList()
+    //Scaffold(modifier = Modifier.background(color = Color.Gray)) {
+
+    val drawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
+
+    val coroutineScope = rememberCoroutineScope()
+
+    BackHandler(enabled = !drawerState.isClosed) {
+        coroutineScope.launch{
+            drawerState.close()
+        }
     }
+
+    BottomDrawer(
+        gesturesEnabled = !drawerState.isClosed,
+        drawerState = drawerState,
+        drawerElevation = 20.dp,
+        drawerContent = {
+            Button(
+                modifier = Modifier.align( Alignment.CenterHorizontally ).padding( top = 16.dp ),
+                onClick = { coroutineScope.launch { drawerState.close() } },
+                content = { Text( "Powrót" ) }
+            )
+            Column(modifier = Modifier.padding(bottom = 56.dp)) {
+                InputsCard(params = productParameters, mode = Mode.Edit)
+                Box(Modifier.fillMaxHeight(0.45f))
+            }
+        },
+        content = {
+            ProductList(drawerState, productParameters)
+        }
+    )
 }
 
 
-data class ProductEntry(
-    val name: String,
-    val id: Number,
-    val expiryDate: Date? = null
-)
-
-
-@SuppressLint("CoroutineCreationDuringComposition")
+@SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ProductList() {
+fun ProductList(drawerState: BottomDrawerState, productParameters: ProductParameters) {
 
-    val ItemMockup = arrayListOf(
+    val ItemMockup = mutableStateListOf(
         ProductEntry("margarita0", 0),
         ProductEntry("capriciossa1", id = 1),
         ProductEntry("margarita2", 2),
@@ -75,135 +98,100 @@ fun ProductList() {
 
     val state = rememberLazyListState()
 
-    val coroutineScope = rememberCoroutineScope()
+    val coroutineScope= rememberCoroutineScope()
+
+
+
 
     LazyColumn(
         state = state,
         modifier = Modifier
             .animateContentSize()
             .fillMaxSize()
-            .padding(bottom = 56.dp, start = 16.dp, end = 16.dp)
+            .padding(bottom = 56.dp, start = 24.dp, end = 24.dp)
     ) {
         state.layoutInfo
-        items(items = productList) { item ->
+        items(items = productList, key = { index -> index.id }) { item ->
             val dismissState = rememberDismissState(
                 confirmStateChange = {
-                    //ItemMockup.remove(item)
-                    //ItemMockup.value =  MutableLiveData <MutableList<ProductEntry>>(mutableListOf(ProductEntry("margarita", 0), ProductEntry("hawajska", id = 17), ProductEntry("quattro carni", id = 83))).value
-
-                    if (it != DismissValue.Default) {
-                    }
-
-                    //state.layoutInfo
-
-                    //false
-                    //if (it == DismissValue.DismissedToEnd) unread = !unread
                     true
                 }
             )
 
-            //Log.i("xdd",item.name)
-
-//            if (dismissState.targetValue == DismissValue.DismissedToEnd) {
             if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
 
                 coroutineScope.launch {
-                    if (isDeleting.tryAcquire()) {
-                        //    delay(100L)
-                        try {
-                            dismissState.reset()
-                            productList.remove(item)
-                            state.layoutInfo
-                        } catch (e: Exception) {
-                        } finally {
-                            isDeleting.release()
-                        }
-                    }
+                    productList.remove(item)
                 }
 
             }
 
-            if (true) {
-                SwipeToDismiss(
-                    state = dismissState,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    directions = setOf(DismissDirection.StartToEnd),
-                    dismissThresholds = { direction ->
-                        FractionalThreshold(0.65f)
-                    },
-                    background = {
-                        val direction = dismissState.dismissDirection ?: return@SwipeToDismiss
-                        val color by animateColorAsState(
-                            when (dismissState.targetValue) {
-                                DismissValue.Default -> Color.LightGray
-                                DismissValue.DismissedToEnd -> MaterialTheme.colors.secondary
-                                DismissValue.DismissedToStart -> Color.Red
-                            }
-                        )
-                        val textColor by animateColorAsState(
-                            when (dismissState.targetValue) {
-                                DismissValue.Default -> MaterialTheme.colors.onBackground
-                                DismissValue.DismissedToEnd -> MaterialTheme.colors.background
-                                DismissValue.DismissedToStart -> Color.Red
-                            }
-                        )
-                        val icon = when (direction) {
-                            DismissDirection.StartToEnd -> Icons.Filled.RestaurantMenu
-                            DismissDirection.EndToStart -> Icons.Default.Delete
-                        }
-                        val warningText = when (dismissState.targetValue) {
-                            DismissValue.Default -> "Przewiniecie usunie pizze"
-                            DismissValue.DismissedToEnd -> "Usunales pizze, jak mogles"
-                            DismissValue.DismissedToStart -> "Usunales pizze, jak mogles"
-                        }
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .background(color)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Text(
-                                text = warningText,
-                                color = textColor
-                            )
-                            Icon(
-                                icon,
-                                contentDescription = "Localized description",
-                                tint = MaterialTheme.colors.background,
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                            )
-                        }
-                    },
-                    dismissContent = {
-                        val color by animateColorAsState(
-                            when ( dismissState.dismissDirection) {
-                                DismissDirection.StartToEnd -> Color.White
-                                DismissDirection.EndToStart -> Color.White
-                                null -> Color.White
-                            }
 
-                        )
-                        Card(
-                            modifier = Modifier,
-                            elevation = 4.dp,
-                            backgroundColor = color
-                        ) {
-                            //state.layoutInfo
-                            ListItem(
-                                text = {
+            SwipeToDismiss(
+                state = dismissState,
+                modifier = Modifier.padding(vertical = 8.dp),
+                directions = setOf(DismissDirection.StartToEnd),
+                dismissThresholds = { direction ->
+                    FractionalThreshold(0.65f)
+                },
+                background = {
+                },
+                dismissContent = {
+                    Card(
+                        shape = RoundedCornerShape(30.dp),
+                        modifier = Modifier,
+                        elevation = 4.dp
+                    ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Column(modifier = Modifier
+                                    .fillMaxWidth(0.65f)
+                                    .padding(start = 16.dp)) {
                                     Text(
                                         item.name,
                                         color = MaterialTheme.colors.onBackground
                                     )
-                                },
-                                secondaryText = { Text("Przewin aby usumac pizze") }
-                            )
-                        }
+                                    Text("Najlepiej spożyć przed: 01.12.2023",
+                                        color = MaterialTheme.colors.onSurface)
+                                }
+
+                                IconButton(onClick = { coroutineScope.launch{
+                                    productParameters.productName.value = item.name
+                                    drawerState.expand() } }, modifier = Modifier
+                                    .align(Alignment.CenterVertically)) {
+                                    Icon(
+                                        Icons.Filled.Edit,
+                                        contentDescription = "Localized description",
+                                        tint = MaterialTheme.colors.onBackground,
+                                        modifier = Modifier
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            dismissState.dismiss(
+                                                DismissDirection.StartToEnd
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Localized description",
+                                        tint = MaterialTheme.colors.onBackground
+                                    )
+                                }
+                            }
+
+
                     }
-                )
-            }
+                }
+            )
         }
     }
 }

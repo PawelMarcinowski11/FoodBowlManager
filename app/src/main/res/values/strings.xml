@@ -1,11 +1,12 @@
 <resources>
-    <string name="app_name">FoodBowlManager</string>
+    <string name="app_name">Food Bowl Manager</string>
     <string name="placeholder_product_name">"Product Name"</string>
     <string name="placeholder_barcode_number">"Barcode Number"</string>
     <string name="placeholder_expiry_date">"Expiry Date"</string>
     <string name="access_reminder_camera">To use barcode and expiry date scanning, allow the app to access the camera.</string>
     <string name="switch_auto_complete">Auto</string>
     <string name="button_save_new">Add</string>
+    <string name="button_save_edited">Save</string>
     <string name="label_scan">Scan</string>
     <string name="label_home">Products</string>
     <string name="label_settings">Setting</string>
