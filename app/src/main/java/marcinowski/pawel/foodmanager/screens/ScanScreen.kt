@@ -28,22 +28,36 @@ import marcinowski.pawel.foodmanager.R
 @Composable
 fun ScanScreen(camera: Camera) {
 
-    var productParameters = ProductParameters()
+    val productParameters = ProductParameters()
 
     BackgroundCamera(camera, productParameters)
     Column() {
-        InputsCard(productParameters)
+        InputsCard(productParameters, Mode.Add)
     }
 }
 
+enum class Mode {Add, Edit}
+
 @Composable
-private fun InputsCard(params: ProductParameters) {
+fun InputsCard(params: ProductParameters, mode: Mode) {
     Card(shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)) {
-        Column(modifier = Modifier
-            .padding(bottom = 10.dp, top = 6.dp)) {
-            TopRow(params)
-            MiddleRow(params)
-            BottomRow(params)
+        Row {
+            Column(
+                modifier = Modifier
+                    .padding(bottom = 10.dp, top = 6.dp)
+            ) {
+                NameField(params)
+                BarcodeField(params)
+                ExpiryDateField(params, mode)
+            }
+            Column(
+                modifier = Modifier
+                    .padding(bottom = 10.dp, top = 6.dp)
+                    .align(Alignment.Bottom)
+            ) {
+                AutoCompleteSwitch(params, mode)
+                SaveButton(params, mode)
+            }
         }
     }
 }
@@ -88,132 +102,127 @@ private fun BackgroundCamera(
 }
 
 @Composable
-private fun TopRow(productParameters: ProductParameters) {
-    Row(modifier = Modifier
-        .wrapContentSize(Alignment.Center)) {
+private fun NameField(productParameters: ProductParameters) {
+    SlimTextField(
+        value = productParameters.productName.value,
+        onValueChange = { productParameters.productName.value = it},
+        textStyle = TextStyle(fontWeight = FontWeight.Bold),
+        modifier = Modifier
+            .padding(start = 9.dp, end = 2.dp)
+            .height(40.dp)
+            .fillMaxWidth(0.7f)
+            .background(
+                MaterialTheme.colors.secondary.copy(0.08f),
+                MaterialTheme.shapes.small,
+            ),
+        placeholderText = stringResource(R.string.placeholder_product_name)
+    )
+}
 
-        SlimTextField(
-            value = productParameters.productName.value,
-            onValueChange = { productParameters.productName.value = it},
-            textStyle = TextStyle(fontWeight = FontWeight.Bold),
+@Composable
+private fun BarcodeField(productParameters: ProductParameters) {
+    val context = LocalContext.current
+    SlimTextField(
+        value = productParameters.barcodeNumber.value,
+        onValueChange = {
+            productParameters.barcodeNumber.value = it
+            if (productParameters.autoComplete.value == true
+                && (it.length == 6 || it.length == 7 || it.length == 12)
+            ) {
+                lookUpProductName(
+                    productParameters.barcodeNumber.value,
+                    productParameters.productName,
+                    context
+                );
+            }
+        },
+        textStyle = TextStyle(fontWeight = FontWeight.Bold),
+        modifier = Modifier
+            .padding(top = 10.dp, start = 9.dp, end = 2.dp)
+            .height(40.dp)
+            .fillMaxWidth(0.7f)
+            .background(
+                MaterialTheme.colors.secondary.copy(0.08f),
+                MaterialTheme.shapes.small,
+            ),
+        placeholderText = stringResource(R.string.placeholder_barcode_number)
+    )
+}
+
+@Composable
+private fun AutoCompleteSwitch(productParameters: ProductParameters, mode: Mode) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 10.dp)) {
+        Text(stringResource(R.string.switch_auto_complete),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
-                .padding(start = 9.dp, end = 2.dp)
+                .align(Alignment.CenterStart)
+                .padding(bottom = 2.dp, start = 10.dp))
+
+        Switch(
+            checked = productParameters.autoComplete.value,
+            onCheckedChange = { checked ->
+                productParameters.autoComplete.value = checked
+            },
+            modifier = Modifier
                 .height(40.dp)
-                .fillMaxWidth(0.7f)
-                .background(
-                    MaterialTheme.colors.secondary.copy(0.08f),
-                    MaterialTheme.shapes.small,
-                ),
-            placeholderText = stringResource(R.string.placeholder_product_name)
+                .scale(1.0f)
+                .align(Alignment.CenterEnd)
+                .padding(start = 8.dp, end = 10.dp)
         )
     }
 }
 
+
 @Composable
-private fun MiddleRow(productParameters: ProductParameters) {
-    Row(modifier = Modifier
-        .padding(top = 10.dp)
-        .wrapContentSize(Alignment.Center)) {
+private fun ExpiryDateField(productParameters: ProductParameters, mode: Mode) {
+    SlimTextField(
+        value = productParameters.expiryDate.value,
+        onValueChange = { productParameters.expiryDate.value = it },
+        textStyle = TextStyle(fontWeight = FontWeight.Bold),
+        modifier = Modifier
+            .padding(top = 10.dp, start = 9.dp, end = 2.dp)
+            .height(40.dp)
+            .fillMaxWidth(0.7f)
+            .background(
+                MaterialTheme.colors.secondary.copy(0.08f),
+                MaterialTheme.shapes.small,
+            ),
+        placeholderText = stringResource(R.string.placeholder_expiry_date)
+    )
+}
 
-        val context = LocalContext.current
-
-
-
-        SlimTextField(
-            value = productParameters.barcodeNumber.value,
-            onValueChange = {
-                productParameters.barcodeNumber.value = it
-                if (productParameters.autoComplete.value == true
-                    && (it.length == 6 || it.length == 7 || it.length == 12)) {
-                    lookUpProductName(
-                        productParameters.barcodeNumber.value,
-                        productParameters.productName,
-                        context
-                    );
+@Composable
+fun SaveButton(productParameters: ProductParameters, mode: Mode) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(40.dp)
+    ) {
+        Button(
+            onClick = {
+                if (mode == Mode.Add) {/*TODO*/
                 }
-            },
-            textStyle = TextStyle(fontWeight = FontWeight.Bold),
+                else {
+
+                }},
             modifier = Modifier
-                .padding(start = 9.dp, end = 2.dp)
-                .height(40.dp)
-                .fillMaxWidth(0.7f)
-                .background(
-                    MaterialTheme.colors.secondary.copy(0.08f),
-                    MaterialTheme.shapes.small,
-                ),
-            placeholderText = stringResource(R.string.placeholder_barcode_number)
-        )
-
-        Box(modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .fillMaxWidth()) {
-            Text(stringResource(R.string.switch_auto_complete),
-                textAlign = TextAlign.Center,
+                .align(Alignment.Center)
+                .padding(start = 9.dp, end = 12.dp)
+                .fillMaxWidth(),
+        ) {
+            Text(
+                if (mode == Mode.Add)
+                    stringResource(R.string.button_save_new)
+                else stringResource(R.string.button_save_edited),
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(bottom = 2.dp, start = 10.dp))
-
-            Switch(
-                checked = productParameters.autoComplete.value,
-                onCheckedChange = { checked ->
-                    productParameters.autoComplete.value = checked
-                },
-                modifier = Modifier
-                    .height(40.dp)
-                    .scale(1.0f)
-                    .align(Alignment.CenterEnd)
-                    .padding(start = 8.dp, end = 10.dp)
+                modifier = Modifier.padding(bottom = 1.dp)
             )
         }
     }
 }
 
-@Composable
-private fun BottomRow(productParameters: ProductParameters) {
-    Row(modifier = Modifier
-        .padding(top = 10.dp)
-        .wrapContentSize(Alignment.Center)) {
-
-
-
-
-        SlimTextField(
-            value = productParameters.expiryDate.value,
-            onValueChange = { productParameters.expiryDate.value = it },
-            textStyle = TextStyle(fontWeight = FontWeight.Bold),
-            modifier = Modifier
-                .padding(start = 9.dp, end = 2.dp)
-                .height(40.dp)
-                .fillMaxWidth(0.7f)
-                .background(
-                    MaterialTheme.colors.secondary.copy(0.08f),
-                    MaterialTheme.shapes.small,
-                ),
-            placeholderText = stringResource(R.string.placeholder_expiry_date)
-        )
-
-
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .align(Alignment.CenterVertically)) {
-            Button(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(start = 9.dp, end = 12.dp)
-                    .fillMaxWidth(),
-            ) {
-                Text(
-                    stringResource(R.string.button_save_new),
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 1.dp)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun SettingsScreen() {
@@ -226,7 +235,7 @@ fun SettingsScreen() {
 
 
 @Composable
-private fun SlimTextField(
+fun SlimTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
