@@ -20,10 +20,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.ProductEntry
 import marcinowski.pawel.foodmanager.ProductParameters
+import marcinowski.pawel.foodmanager.R
 
 //private var isDeleting: Semaphore = Semaphore(1)
 
@@ -90,7 +92,7 @@ fun HomeScreen() {
                         drawerState.close()
                     }
                 },
-                content = { Text( "Powrót" ) }
+                content = { Text( stringResource(R.string.HideDrawerButton) ) }
             )
             Column(modifier = Modifier.padding(bottom = 56.dp)) {
                 InputsCard(
@@ -169,54 +171,52 @@ fun ProductList(
                         modifier = Modifier,
                         elevation = 4.dp
                     ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(10.dp)
-                                    .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceAround
-                            ) {
-                                Column(modifier = Modifier
-                                    .fillMaxWidth(0.65f)
-                                    .padding(start = 16.dp)) {
-                                    Text(
-                                        item.name,
-                                        color = MaterialTheme.colors.onBackground
-                                    )
-                                    Text("Najlepiej spożyć przed: 01.12.2023",
-                                        color = MaterialTheme.colors.onSurface)
-                                }
-
-                                IconButton(onClick = { coroutineScope.launch{
-                                    productParameters.productName.value = item.name
-                                    productParameters.id.value = item.id
-                                    drawerState.expand() } }, modifier = Modifier
-                                    .align(Alignment.CenterVertically)) {
-                                    Icon(
-                                        Icons.Filled.Edit,
-                                        contentDescription = "Localized description",
-                                        tint = MaterialTheme.colors.onBackground,
-                                        modifier = Modifier
-                                    )
-                                }
-                                IconButton(
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            dismissState.dismiss(
-                                                DismissDirection.StartToEnd
-                                            )
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.CenterVertically)) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Localized description",
-                                        tint = MaterialTheme.colors.onBackground
-                                    )
-                                }
+                        Row(
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            Column(modifier = Modifier
+                                .fillMaxWidth(0.65f)
+                                .padding(start = 16.dp)) {
+                                Text(
+                                    item.name,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                                Text("Najlepiej spożyć przed: 01.12.2023",
+                                    color = MaterialTheme.colors.onSurface)
                             }
 
-
+                            IconButton(onClick = { coroutineScope.launch{
+                                productParameters.productName.value = item.name
+                                productParameters.id.value = item.id
+                                drawerState.expand() } }, modifier = Modifier
+                                .align(Alignment.CenterVertically)) {
+                                Icon(
+                                    Icons.Filled.Edit,
+                                    contentDescription = stringResource(R.string.DescriptionEditIcon),
+                                    tint = MaterialTheme.colors.onBackground,
+                                    modifier = Modifier
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        dismissState.dismiss(
+                                            DismissDirection.StartToEnd
+                                        )
+                                    }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterVertically)) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.DescriptionDeleteIcon),
+                                    tint = MaterialTheme.colors.onBackground
+                                )
+                            }
+                        }
                     }
                 }
             )
