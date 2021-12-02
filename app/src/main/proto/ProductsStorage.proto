@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "marcinowski.pawel.foodmanager";
+option java_multiple_files = true;
+
+message ProductStorage {
+    repeated ProductEntry entries = 1;
+}
+message ProductEntry {
+    string productName = 1;
+    string barcodeNumber = 2;
+    string id = 3;
+    int64 expiryDate = 4;
+}

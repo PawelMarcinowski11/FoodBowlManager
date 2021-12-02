@@ -1,6 +1,7 @@
 package marcinowski.pawel.foodmanager.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
@@ -12,49 +13,20 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import marcinowski.pawel.foodmanager.ProductEntry
-import marcinowski.pawel.foodmanager.ProductParameters
+import marcinowski.pawel.foodmanager.*
 import marcinowski.pawel.foodmanager.R
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-//private var isDeleting: Semaphore = Semaphore(1)
-
-val ItemMockup = mutableStateListOf(
-    ProductEntry("margarita0", 0),
-    ProductEntry("capriciossa1", id = 1),
-    ProductEntry("margarita2", 2),
-    ProductEntry("capriciossa3", id = 3),
-    ProductEntry("margarit4a", 4),
-    ProductEntry("capric5iossa", id = 5),
-    ProductEntry("6margarita", 6),
-    ProductEntry("caprici7ossa", id = 7),
-    ProductEntry("m8argarita", 8),
-    ProductEntry("caprici9ossa", id = 9),
-    ProductEntry("margarita", 10),
-    ProductEntry("capriciossa", id = 11),
-    ProductEntry("margarita", 12),
-    ProductEntry("capriciossa", id = 13),
-    ProductEntry("margarita", 14),
-    ProductEntry("capriciossa", id = 15),
-    ProductEntry("margarita", 16),
-    ProductEntry("capriciossa", id = 17),
-    ProductEntry("margarita", 18),
-    ProductEntry("capriciossa", id = 19),
-    ProductEntry("margarita", 20),
-    ProductEntry("capriciossa", id = 21),
-    ProductEntry("quattro carni", id = 22)
-)
-
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen() {
@@ -65,7 +37,19 @@ fun HomeScreen() {
 
     val coroutineScope = rememberCoroutineScope()
 
-    val productList = ItemMockup
+    val context = LocalContext.current
+
+    coroutineScope.launch {
+        //Products(context).clearProducts()
+        //Barcodes(context).clearBarcodes()
+    }
+
+    val productListState =  ( Products(context).getProducts().collectAsState(
+        initial = null)
+            )
+
+    val productList = productListState
+    //val productList = ItemMockup
 
     val focusManager = LocalFocusManager.current
 
@@ -99,11 +83,34 @@ fun HomeScreen() {
                     params = productParameters,
                     mode = Mode.Edit,
                     onClick = {
+
                         coroutineScope.launch {
-                            productList.find { it.id == productParameters.id.value }?.update(productParameters.productName.value)
-                            focusManager.clearFocus()
-                            drawerState.close()
+                            try {
+                                val parsedDate = LocalDate.parse(
+                                    productParameters.expiryDate.value,
+                                    DateTimeFormatter.ofPattern("dd.MM.yyyy")
+                                )
+
+                                Products(context).updateProduct(
+                                    productParameters.productName.value,
+                                    productParameters.barcodeNumber.value,
+                                    productParameters.id.value,
+                                    parsedDate
+                                )
+
+                                Barcodes(context).updateBarcode(
+                                    productParameters.productName.value,
+                                    productParameters.barcodeNumber.value
+                                )
+
+                                focusManager.clearFocus()
+                                drawerState.close()
+                            }
+                            catch (e: Exception) {
+                                Toast.makeText(context, context.getResources().getString(R.string.toast_invalid_parameters), Toast.LENGTH_SHORT).show()
+                            }
                         }
+
                     }
                 )
                 Box(Modifier.fillMaxHeight(0.45f))
@@ -122,14 +129,14 @@ fun HomeScreen() {
 fun ProductList(
     drawerState: BottomDrawerState,
     productParameters: ProductParameters,
-    productList: SnapshotStateList<ProductEntry>
+    productList: State<List<Product>?>
 ) {
 
     val state = rememberLazyListState()
 
     val coroutineScope= rememberCoroutineScope()
 
-
+    val context = LocalContext.current
 
 
     LazyColumn(
@@ -140,7 +147,7 @@ fun ProductList(
             .padding(bottom = 56.dp, start = 24.dp, end = 24.dp)
     ) {
         state.layoutInfo
-        items(items = productList, key = { index -> index.id }) { item ->
+        items(items = productList.value ?: listOf(), key = { index -> index.id }) { item ->
             val dismissState = rememberDismissState(
                 confirmStateChange = {
                     true
@@ -150,7 +157,9 @@ fun ProductList(
             if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
 
                 coroutineScope.launch {
-                    productList.remove(item)
+
+                    Products(context).removeProduct(item.id)
+
                 }
 
             }
@@ -184,12 +193,16 @@ fun ProductList(
                                     item.name,
                                     color = MaterialTheme.colors.onBackground
                                 )
-                                Text("Najlepiej spożyć przed: 01.12.2023",
+                                Text("Najlepiej spożyć przed: " + item.expiryDate?.format(
+                                    DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                                     color = MaterialTheme.colors.onSurface)
                             }
 
                             IconButton(onClick = { coroutineScope.launch{
                                 productParameters.productName.value = item.name
+                                productParameters.barcodeNumber.value = item.barcodeNumber
+                                productParameters.expiryDate.value = item.expiryDate?.format(
+                                    DateTimeFormatter.ofPattern("dd.MM.yyyy")) ?: ""
                                 productParameters.id.value = item.id
                                 drawerState.expand() } }, modifier = Modifier
                                 .align(Alignment.CenterVertically)) {

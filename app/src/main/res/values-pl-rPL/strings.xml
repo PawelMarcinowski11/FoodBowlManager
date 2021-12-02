@@ -11,7 +11,10 @@
     <string name="label_scan">Skan</string>
     <string name="label_home">Produkty</string>
     <string name="label_settings">Ustawienia</string>
+
     <string name="toast_product_not_found">Nie znaleziono nazwy produktu o danym kodzie kreskowym</string>
+    <string name="toast_invalid_parameters">Wprowadzone dane są nieprawidłowe</string>
+
     <string name="HideDrawerButton">Powrót</string>
     <string name="DescriptionEditIcon">Edytuj</string>
     <string name="DescriptionDeleteIcon">Usuń</string>

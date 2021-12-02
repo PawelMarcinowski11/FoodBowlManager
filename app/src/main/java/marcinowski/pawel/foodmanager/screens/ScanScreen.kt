@@ -11,6 +11,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -23,6 +25,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.*
 import marcinowski.pawel.foodmanager.R
 
@@ -31,10 +34,25 @@ import marcinowski.pawel.foodmanager.R
 fun ScanScreen(camera: Camera) {
 
     val productParameters = ProductParameters()
+    val context = LocalContext.current
+    val coroutineScope= rememberCoroutineScope()
+
+
 
     BackgroundCamera(camera, productParameters)
     Column() {
-        InputsCard(productParameters, Mode.Add, {})
+        InputsCard(productParameters, Mode.Add) {
+            coroutineScope.launch {
+                Barcodes(context).saveBarcode(
+                    productParameters.productName.value,
+                    productParameters.barcodeNumber.value
+                )
+                Products(context).saveProduct(
+                    productParameters.productName.value,
+                    productParameters.barcodeNumber.value
+                )
+            }
+        }
     }
 }
 
@@ -122,20 +140,32 @@ private fun NameField(productParameters: ProductParameters) {
 @Composable
 private fun BarcodeField(productParameters: ProductParameters) {
     val context = LocalContext.current
+
+
+    val barcodesListState = (Barcodes(context).getBarcodes().collectAsState(
+        initial = null)
+            )
+
     SlimTextField(
         value = productParameters.barcodeNumber.value,
         onValueChange = {
-            val barcodeFormat = """\A\d{0,12}\Z"""
-            if (Regex(barcodeFormat).matches(it))
-            productParameters.barcodeNumber.value = it
-            if (productParameters.autoComplete.value == true
-                && (it.length == 6 || it.length == 7 || it.length == 12)
-            ) {
-                lookUpProductName(
-                    productParameters.barcodeNumber.value,
-                    productParameters.productName,
-                    context
-                );
+            val barcodeFormat = """\A\d{0,13}\Z"""
+            if (Regex(barcodeFormat).matches(it)) {
+                productParameters.barcodeNumber.value = it
+                if (productParameters.autoComplete.value == true) {
+                    val newNumber = it
+                    val existingBarcode = barcodesListState.value?.find {it.number == newNumber}
+                    if (existingBarcode != null) {
+                        productParameters.productName.value = existingBarcode.name
+                    }
+                    else if (it.length == 6 || it.length == 8 || it.length == 12 || it.length == 13) {
+                        lookUpProductName(
+                            productParameters.barcodeNumber.value,
+                            productParameters.productName,
+                            context
+                        );
+                    }
+                }
             }
         },
         textStyle = TextStyle(fontWeight = FontWeight.Bold),

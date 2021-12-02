@@ -10,7 +10,10 @@
     <string name="label_scan">Scan</string>
     <string name="label_home">Products</string>
     <string name="label_settings">Setting</string>
+
     <string name="toast_product_not_found">No product name found for this barcode</string>
+    <string name="toast_invalid_parameters">Inputted parameters are invalid</string>
+
     <string name="HideDrawerButton">Back</string>
     <string name="DescriptionEditIcon">Edit</string>
     <string name="DescriptionDeleteIcon">Remove</string>
