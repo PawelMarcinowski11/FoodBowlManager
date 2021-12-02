@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.TextureView
 import android.view.View
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +29,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.*
 import marcinowski.pawel.foodmanager.R
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -43,14 +46,32 @@ fun ScanScreen(camera: Camera) {
     Column() {
         InputsCard(productParameters, Mode.Add) {
             coroutineScope.launch {
-                Barcodes(context).saveBarcode(
-                    productParameters.productName.value,
-                    productParameters.barcodeNumber.value
-                )
-                Products(context).saveProduct(
-                    productParameters.productName.value,
-                    productParameters.barcodeNumber.value
-                )
+                if (productParameters.productName.value.trim() == "") {
+                    Toast.makeText(context, context.resources.getString(R.string.toast_empty_product_name), Toast.LENGTH_SHORT).show()
+                }
+                else {
+                    try {
+                        val parsedDate = LocalDate.parse(
+                            productParameters.expiryDate.value,
+                            DateTimeFormatter.ofPattern("dd.MM.yyyy")
+                        )
+                        Barcodes(context).saveBarcode(
+                            productParameters.productName.value,
+                            productParameters.barcodeNumber.value
+                        )
+                        Products(context).saveProduct(
+                            productParameters.productName.value,
+                            productParameters.barcodeNumber.value,
+                            parsedDate
+                        )
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            context,
+                            context.resources.getString(R.string.toast_invalid_parameters),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             }
         }
     }

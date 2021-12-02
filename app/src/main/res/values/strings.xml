@@ -17,4 +17,5 @@
     <string name="HideDrawerButton">Back</string>
     <string name="DescriptionEditIcon">Edit</string>
     <string name="DescriptionDeleteIcon">Remove</string>
+    <string name="toast_empty_product_name">Fill the product name in</string>
 </resources>

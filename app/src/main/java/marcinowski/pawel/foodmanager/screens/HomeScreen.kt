@@ -39,11 +39,6 @@ fun HomeScreen() {
 
     val context = LocalContext.current
 
-    coroutineScope.launch {
-        //Products(context).clearProducts()
-        //Barcodes(context).clearBarcodes()
-    }
-
     val productListState =  ( Products(context).getProducts().collectAsState(
         initial = null)
             )

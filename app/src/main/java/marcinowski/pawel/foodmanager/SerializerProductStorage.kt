@@ -61,7 +61,7 @@ class Products(private val context: Context) {
         }
     }
 
-    suspend fun saveProduct(name: String, number: String) {
+    suspend fun saveProduct(name: String, number: String, date: LocalDate) {
         context.productProtoDataStore.updateData { productsStorage ->
             productsStorage.toBuilder()
                 .addEntries(
@@ -69,7 +69,7 @@ class Products(private val context: Context) {
                         .setProductName(name)
                         .setBarcodeNumber(number)
                         .setId(UUID.randomUUID().toString())
-                        .setExpiryDate(LocalDate.now().toEpochDay())
+                        .setExpiryDate(date.toEpochDay())
                         .build()
                 )
                 .build()
