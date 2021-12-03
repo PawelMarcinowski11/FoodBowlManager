@@ -10,6 +10,10 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlin.concurrent.thread
 
@@ -131,16 +135,23 @@ class ImageProcessing(
                                             productParameters.barcodeNumber.value =
                                                 barcodes[0].displayValue!!
 
+                                            CoroutineScope(Dispatchers.IO).launch {
+                                                val barcodesList = Barcodes(context).getBarcodes().firstOrNull()
+                                                val existingBarcode = barcodesList?.find {it.number == barcodes[0].displayValue!!}
+                                                if (existingBarcode != null) {
+                                                    productParameters.productName.value = existingBarcode.name
+                                                }
+                                                else {
+                                                    lookUpProductName(
+                                                        productParameters.barcodeNumber.value,
+                                                        productParameters.productName,
+                                                        context
+                                                    );
+                                                }
+                                            }
 
-                                            lookUpProductName(
-                                                productParameters.barcodeNumber.value,
-                                                productParameters.productName,
-                                                context
-                                            );
 
                                         }
-
-
 
 
                                         isProcessingBarcode.release()
