@@ -111,7 +111,7 @@ class Camera(
             texture.setDefaultBufferSize(imageDimension!!.width, imageDimension!!.height)
             val surface = android.view.Surface(texture)
             captureRequestBuilder =
-                cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+                cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
             captureRequestBuilder!!.addTarget(surface)
 
             cameraDevice!!.createCaptureSession(
