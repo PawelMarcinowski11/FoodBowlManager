@@ -41,7 +41,7 @@ class Camera(
                 val resolutions =
                     characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
                 for (resolution in resolutions.getOutputSizes(SurfaceTexture::class.java)) {
-                    if (resolution.height * 16 == resolution.width * 9) {
+                    if (resolution.height * 16 == resolution.width * 9 && resolution.height * resolution.width < 2500000) {
                         imageDimension = resolution
                         break
                     }
