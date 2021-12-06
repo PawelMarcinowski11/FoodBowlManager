@@ -57,6 +57,8 @@ class Products(private val context: Context) {
                 )
             }
 
+            productList.sortBy { product -> product.expiryDate }
+
             productList
         }
     }

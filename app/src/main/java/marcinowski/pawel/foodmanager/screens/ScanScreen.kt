@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.*
@@ -44,6 +46,26 @@ fun ScanScreen(camera: Camera) {
 
     BackgroundCamera(camera, productParameters)
     Column() {
+        Card(
+            shape = RectangleShape,
+            modifier = Modifier
+                .height(52.dp)
+                .padding(bottom = 4.dp)
+                .fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Box {
+                Text(
+                    stringResource(R.string.header_scan),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 8.dp)
+                )
+            }
+        }
         InputsCard(productParameters, Mode.Add) {
             coroutineScope.launch {
                 if (productParameters.productName.value.trim() == "") {
@@ -112,7 +134,7 @@ private fun BackgroundCamera(
                 .fillMaxSize()
         )
         Text(
-            text = stringResource(R.string.access_reminder_camera),
+            text = stringResource(R.string.reminder_access_camera),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.Center)
@@ -280,9 +302,31 @@ fun SaveButton(productParameters: ProductParameters, mode: Mode, onClickEvent: (
 
 @Composable
 fun SettingsScreen() {
-    Text(
-        text = "Ustawienia"
-    )
+    Column (Modifier.fillMaxHeight()) {
+        Card(
+            shape = RectangleShape,
+            modifier = Modifier
+                .height(52.dp)
+                .padding(bottom = 4.dp)
+                .fillMaxWidth(),
+            elevation = 4.dp,
+        ) {
+            Box {
+                Text(
+                    stringResource(R.string.header_settings),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 8.dp)
+                )
+            }
+        }
+        Text(
+            text = stringResource(R.string.header_settings)
+        )
+    }
 }
 
 
