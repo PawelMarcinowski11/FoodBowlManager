@@ -103,7 +103,10 @@ enum class Mode {Add, Edit}
 
 @Composable
 fun InputsCard(params: ProductParameters, mode: Mode, onClick: () -> Unit) {
-    Card(shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)) {
+    Card(
+        shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp),
+        elevation = 0.dp
+    ) {
         Row (
             modifier = Modifier
             .padding(bottom = 10.dp, top = 6.dp)
@@ -167,7 +170,6 @@ private fun NameField(productParameters: ProductParameters) {
     SlimTextField(
         value = productParameters.productName.value,
         onValueChange = { productParameters.productName.value = it},
-        textStyle = TextStyle(fontWeight = FontWeight.Bold),
         modifier = Modifier
             .padding(start = 9.dp, end = 2.dp)
             .height(40.dp)
@@ -211,7 +213,6 @@ private fun BarcodeField(productParameters: ProductParameters) {
                 }
             }
         },
-        textStyle = TextStyle(fontWeight = FontWeight.Bold),
         modifier = Modifier
             .padding(top = 10.dp, start = 9.dp, end = 2.dp)
             .height(40.dp)
@@ -232,7 +233,6 @@ private fun AutoCompleteSwitch(productParameters: ProductParameters) {
         .padding(bottom = 10.dp)) {
         Text(stringResource(R.string.switch_auto_complete),
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(bottom = 2.dp, start = 10.dp))
@@ -261,7 +261,6 @@ private fun ExpiryDateField(productParameters: ProductParameters) {
             if (Regex(dateFormat).matches(it))
                 productParameters.expiryDate.value = it
         },
-        textStyle = TextStyle(fontWeight = FontWeight.Bold),
         modifier = Modifier
             .padding(top = 10.dp, start = 9.dp, end = 2.dp)
             .height(40.dp)
@@ -292,7 +291,6 @@ fun SaveButton(productParameters: ProductParameters, mode: Mode, onClickEvent: (
                 if (mode == Mode.Add)
                     stringResource(R.string.button_save_new)
                 else stringResource(R.string.button_save_edited),
-                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 1.dp)
             )
         }
