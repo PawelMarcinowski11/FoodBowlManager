@@ -73,19 +73,34 @@ fun ScanScreen(camera: Camera) {
                 }
                 else {
                     try {
-                        val parsedDate = LocalDate.parse(
-                            productParameters.expiryDate.value,
-                            DateTimeFormatter.ofPattern("dd.MM.yyyy")
-                        )
-                        Barcodes(context).saveBarcode(
-                            productParameters.productName.value,
-                            productParameters.barcodeNumber.value
-                        )
+                        val parsedDate: LocalDate
+
+                        val year = productParameters.expiryDate.value.substringAfterLast('.')
+
+                        if (year.length == 2) {
+                            parsedDate = LocalDate.parse(
+                                productParameters.expiryDate.value,
+                                DateTimeFormatter.ofPattern("d.M.yy")
+                            )
+                        }
+                        else {
+                            parsedDate = LocalDate.parse(
+                                productParameters.expiryDate.value,
+                                DateTimeFormatter.ofPattern("d.M.yyyy")
+                            )
+                        }
+
+                        if (productParameters.barcodeNumber.value != "")
+                            Barcodes(context).saveBarcode(
+                                productParameters.productName.value,
+                                productParameters.barcodeNumber.value
+                            )
                         Products(context).saveProduct(
                             productParameters.productName.value,
                             productParameters.barcodeNumber.value,
                             parsedDate
                         )
+                        Toast.makeText(context, context.resources.getString(R.string.toast_added_product), Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Toast.makeText(
                             context,
@@ -113,7 +128,7 @@ fun InputsCard(params: ProductParameters, mode: Mode, onClick: () -> Unit) {
         ) {
             Column {
                 NameField(params)
-                BarcodeField(params)
+                BarcodeField(params, mode)
                 ExpiryDateField(params)
             }
             Column(
@@ -183,7 +198,7 @@ private fun NameField(productParameters: ProductParameters) {
 }
 
 @Composable
-private fun BarcodeField(productParameters: ProductParameters) {
+private fun BarcodeField(productParameters: ProductParameters, mode: Mode) {
     val context = LocalContext.current
 
 

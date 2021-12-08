@@ -15,6 +15,8 @@
     <string name="toast_product_not_found">Nie znaleziono nazwy produktu o danym kodzie kreskowym</string>
     <string name="toast_invalid_parameters">Wprowadzone dane są nieprawidłowe</string>
     <string name="toast_empty_product_name">Uzupełnij nazwę produktu</string>
+    <string name="toast_added_product">Dodano nowy produkt</string>
+
     <string name="snackbar_product_removal">Usunięto produkt</string>
 
     <string name="drawer_button_hide">Powrót</string>

@@ -83,32 +83,57 @@ fun HomeScreen() {
                     onClick = {
 
                         coroutineScope.launch {
-                            try {
-                                val parsedDate = LocalDate.parse(
-                                    productParameters.expiryDate.value,
-                                    DateTimeFormatter.ofPattern("dd.MM.yyyy")
-                                )
+                            if (productParameters.productName.value.trim() == "") {
+                                Toast.makeText(
+                                    context,
+                                    context.resources.getString(R.string.toast_empty_product_name),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                try {
+                                    val parsedDate: LocalDate
 
-                                Products(context).updateProduct(
-                                    productParameters.productName.value,
-                                    productParameters.barcodeNumber.value,
-                                    productParameters.id.value,
-                                    parsedDate
-                                )
+                                    val year = productParameters.expiryDate.value.substringAfterLast('.')
 
-                                Barcodes(context).updateBarcode(
-                                    productParameters.productName.value,
-                                    productParameters.barcodeNumber.value
-                                )
+                                    if (year.length == 2) {
+                                        parsedDate = LocalDate.parse(
+                                            productParameters.expiryDate.value,
+                                            DateTimeFormatter.ofPattern("d.M.yy")
+                                        )
+                                    }
+                                    else {
+                                        parsedDate = LocalDate.parse(
+                                            productParameters.expiryDate.value,
+                                            DateTimeFormatter.ofPattern("d.M.yyyy")
+                                        )
+                                    }
 
-                                focusManager.clearFocus()
-                                drawerState.close()
-                            }
-                            catch (e: Exception) {
-                                Toast.makeText(context, context.getResources().getString(R.string.toast_invalid_parameters), Toast.LENGTH_SHORT).show()
+                                    Products(context).updateProduct(
+                                        productParameters.productName.value,
+                                        productParameters.barcodeNumber.value,
+                                        productParameters.id.value,
+                                        parsedDate
+                                    )
+
+                                    if (productParameters.barcodeNumber.value != "") {
+                                        Barcodes(context).updateBarcode(
+                                            productParameters.productName.value,
+                                            productParameters.barcodeNumber.value
+                                        )
+                                    }
+
+                                    focusManager.clearFocus()
+                                    drawerState.close()
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        context,
+                                        context.getResources()
+                                            .getString(R.string.toast_invalid_parameters),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
                         }
-
                     }
                 )
                 Box(Modifier.fillMaxHeight(0.45f))
