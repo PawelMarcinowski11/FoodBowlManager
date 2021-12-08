@@ -169,7 +169,8 @@ fun ProductList(
 
     val snackScope = rememberCoroutineScope()
 
-    Box (Modifier.fillMaxSize()) {
+    Box (Modifier.fillMaxSize()
+        .padding(bottom = 56.dp)) {
         Column (Modifier.fillMaxHeight()) {
             Card(
                 shape = RectangleShape,
@@ -327,12 +328,12 @@ fun ProductList(
         }
         Box(modifier = Modifier
             .align(Alignment.BottomCenter)
-            .height(130.dp)) {
+            .height(80.dp)) {
             SnackbarHost(
                 hostState = snackState,
                 Modifier
                     .fillMaxSize()
-                    .padding(bottom = 56.dp, start = 12.dp, end = 12.dp)
+                    .padding(start = 12.dp, end = 12.dp)
             )
         }
     }
