@@ -312,39 +312,6 @@ fun SaveButton(productParameters: ProductParameters, mode: Mode, onClickEvent: (
     }
 }
 
-
-@Composable
-fun SettingsScreen() {
-    Column (Modifier.fillMaxHeight()) {
-        Card(
-            shape = RectangleShape,
-            modifier = Modifier
-                .height(52.dp)
-                .padding(bottom = 4.dp)
-                .fillMaxWidth(),
-            elevation = 4.dp,
-        ) {
-            Box {
-                Text(
-                    stringResource(R.string.header_settings),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 8.dp)
-                )
-            }
-        }
-        Text(
-            text = stringResource(R.string.header_settings)
-        )
-    }
-}
-
-
-
-
 @Composable
 fun SlimTextField(
     value: String,

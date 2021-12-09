@@ -3,7 +3,8 @@ package marcinowski.pawel.foodmanager.screens
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -147,7 +148,7 @@ fun HomeScreen() {
 
 
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun ProductList(
     drawerState: BottomDrawerState,
@@ -169,8 +170,10 @@ fun ProductList(
 
     val snackScope = rememberCoroutineScope()
 
-    Box (Modifier.fillMaxSize()
-        .padding(bottom = 56.dp)) {
+    Box (
+        Modifier
+            .fillMaxSize()
+            .padding(bottom = 56.dp)) {
         Column (Modifier.fillMaxHeight()) {
             Card(
                 shape = RectangleShape,
@@ -200,129 +203,146 @@ fun ProductList(
                     .fillMaxHeight(1.0f)
                     .padding(horizontal = 24.dp)
             ) {
-                state.layoutInfo
+
                 items(items = productList.value ?: listOf(), key = { index -> index.id }) { item ->
-                    val dismissState = rememberDismissState(
-                        confirmStateChange = {
-                            true
-                        }
-                    )
 
-                    if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
+                    val animVisibleState = remember { MutableTransitionState(false) }
+                        .apply { targetState = true }
 
-                        coroutineScope.launch {
+                    AnimatedVisibility(
+                        visibleState = animVisibleState,
+                        enter = expandVertically(clip = false),
+                        exit = shrinkVertically(clip = false)
+                    ) {
 
-                            previouslyRemoved = item
-                            Products(context).removeProduct(item.id)
 
-                            if (snackState.currentSnackbarData == null) {
-                                snackScope.launch {
-                                    val result = snackState
-                                        .showSnackbar(
-                                            message = context.resources.getString(R.string.snackbar_product_removal),
-                                            actionLabel = context.resources.getString(R.string.snackbar_button_undo),
-                                            duration = SnackbarDuration.Long
-                                        )
-                                    when (result) {
-                                        SnackbarResult.ActionPerformed -> {
-                                            Products(context).saveProduct(
-                                                previouslyRemoved.name,
-                                                previouslyRemoved.barcodeNumber,
-                                                previouslyRemoved.expiryDate!!
-                                            )
-                                        }
-                                        SnackbarResult.Dismissed -> {
+                        val dismissState = rememberDismissState(
+                            confirmStateChange = {
+                                animVisibleState.targetState = false
+                                true
+                            }
+                        )
+
+                        if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
+
+                            if (true) {
+
+                                coroutineScope.launch {
+
+                                    previouslyRemoved = item
+                                    Products(context).removeProduct(item.id)
+
+                                    if (snackState.currentSnackbarData == null) {
+                                        snackScope.launch {
+                                            val result = snackState
+                                                .showSnackbar(
+                                                    message = context.resources.getString(R.string.snackbar_product_removal),
+                                                    actionLabel = context.resources.getString(R.string.snackbar_button_undo),
+                                                    duration = SnackbarDuration.Long
+                                                )
+                                            when (result) {
+                                                SnackbarResult.ActionPerformed -> {
+                                                    Products(context).saveProduct(
+                                                        previouslyRemoved.name,
+                                                        previouslyRemoved.barcodeNumber,
+                                                        previouslyRemoved.expiryDate!!
+                                                    )
+                                                }
+                                                SnackbarResult.Dismissed -> {
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
+
                         }
 
-                    }
-
-                    SwipeToDismiss(
-                        state = dismissState,
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        directions = setOf(DismissDirection.StartToEnd),
-                        dismissThresholds = { direction ->
-                            FractionalThreshold(0.65f)
-                        },
-                        background = {
-                        },
-                        dismissContent = {
-                            Card(
-                                shape = RoundedCornerShape(30.dp),
-                                modifier = Modifier,
-                                elevation = 4.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(10.dp)
-                                        .fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceAround
+                        SwipeToDismiss(
+                            state = dismissState,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            directions = setOf(DismissDirection.StartToEnd),
+                            dismissThresholds = { direction ->
+                                FractionalThreshold(0.65f)
+                            },
+                            background = {
+                            },
+                            dismissContent = {
+                                Card(
+                                    shape = RoundedCornerShape(30.dp),
+                                    modifier = Modifier,
+                                    elevation = 4.dp
                                 ) {
-                                    Column(
+                                    Row(
                                         modifier = Modifier
-                                            .fillMaxWidth(0.65f)
-                                            .padding(start = 16.dp)
+                                            .padding(10.dp)
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceAround
                                     ) {
-                                        Text(
-                                            item.name,
-                                            color = MaterialTheme.colors.onBackground
-                                        )
-                                        Text(
-                                            "Najlepiej spożyć przed: " + item.expiryDate?.format(
-                                                DateTimeFormatter.ofPattern("dd.MM.yyyy")
-                                            ),
-                                            color = MaterialTheme.colors.onSurface
-                                        )
-                                    }
-
-                                    IconButton(
-                                        onClick = {
-                                            coroutineScope.launch {
-                                                productParameters.productName.value = item.name
-                                                productParameters.barcodeNumber.value =
-                                                    item.barcodeNumber
-                                                productParameters.expiryDate.value =
-                                                    item.expiryDate?.format(
-                                                        DateTimeFormatter.ofPattern("dd.MM.yyyy")
-                                                    ) ?: ""
-                                                productParameters.id.value = item.id
-                                                drawerState.expand()
-                                            }
-                                        }, modifier = Modifier
-                                            .align(Alignment.CenterVertically)
-                                    ) {
-                                        Icon(
-                                            Icons.Filled.Edit,
-                                            contentDescription = stringResource(R.string.accesibility_description_edit),
-                                            tint = MaterialTheme.colors.onBackground,
+                                        Column(
                                             modifier = Modifier
-                                        )
-                                    }
-
-                                    IconButton(
-                                        onClick = {
-                                            coroutineScope.launch {
-                                            dismissState.dismiss(
-                                                DismissDirection.StartToEnd
+                                                .fillMaxWidth(0.65f)
+                                                .padding(start = 16.dp)
+                                        ) {
+                                            Text(
+                                                item.name,
+                                                color = MaterialTheme.colors.onBackground
                                             )
-                                            }
-                                        },
-                                        modifier = Modifier
-                                            .align(Alignment.CenterVertically)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = stringResource(R.string.accesibility_description_delete),
-                                            tint = MaterialTheme.colors.onBackground
-                                        )
+                                            Text(
+                                                "Najlepiej spożyć przed: " + item.expiryDate?.format(
+                                                    DateTimeFormatter.ofPattern("dd.MM.yyyy")
+                                                ),
+                                                color = MaterialTheme.colors.onSurface
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                coroutineScope.launch {
+                                                    productParameters.productName.value = item.name
+                                                    productParameters.barcodeNumber.value =
+                                                        item.barcodeNumber
+                                                    productParameters.expiryDate.value =
+                                                        item.expiryDate?.format(
+                                                            DateTimeFormatter.ofPattern("dd.MM.yyyy")
+                                                        ) ?: ""
+                                                    productParameters.id.value = item.id
+                                                    drawerState.expand()
+                                                }
+                                            }, modifier = Modifier
+                                                .align(Alignment.CenterVertically)
+                                        ) {
+                                            Icon(
+                                                Icons.Filled.Edit,
+                                                contentDescription = stringResource(R.string.accesibility_description_edit),
+                                                tint = MaterialTheme.colors.onBackground,
+                                                modifier = Modifier
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                animVisibleState.targetState = false
+                                                coroutineScope.launch {
+                                                    dismissState.dismiss(
+                                                        DismissDirection.StartToEnd
+                                                    )
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .align(Alignment.CenterVertically)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = stringResource(R.string.accesibility_description_delete),
+                                                tint = MaterialTheme.colors.onBackground
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
