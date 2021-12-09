@@ -30,6 +30,8 @@ import marcinowski.pawel.foodmanager.*
 import marcinowski.pawel.foodmanager.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterialApi::class)
@@ -195,30 +197,33 @@ fun ProductList(
                     )
                 }
             }
+
+            var initialState = remember { mutableStateOf(true) }
+
             LazyColumn(
                 state = state,
                 modifier = Modifier
                     .animateContentSize()
                     .fillMaxWidth()
                     .fillMaxHeight(1.0f)
-                    .padding(horizontal = 24.dp)
             ) {
 
                 items(items = productList.value ?: listOf(), key = { index -> index.id }) { item ->
 
-                    val animVisibleState = remember { MutableTransitionState(false) }
+                    val animVisibleState = remember { MutableTransitionState(initialState.value) }
                         .apply { targetState = true }
 
                     AnimatedVisibility(
                         visibleState = animVisibleState,
-                        enter = expandVertically(clip = false),
-                        exit = shrinkVertically(clip = false)
+                        enter = expandVertically(),
+                        exit = shrinkVertically()
                     ) {
 
 
                         val dismissState = rememberDismissState(
                             confirmStateChange = {
-                                animVisibleState.targetState = false
+                                if (it == DismissValue.DismissedToEnd)
+                                    animVisibleState.targetState = false
                                 true
                             }
                         )
@@ -242,11 +247,15 @@ fun ProductList(
                                                 )
                                             when (result) {
                                                 SnackbarResult.ActionPerformed -> {
+                                                    initialState.value = false
                                                     Products(context).saveProduct(
                                                         previouslyRemoved.name,
                                                         previouslyRemoved.barcodeNumber,
                                                         previouslyRemoved.expiryDate!!
                                                     )
+                                                    Executors.newSingleThreadScheduledExecutor().schedule({
+                                                        initialState.value = true
+                                                    }, 300, TimeUnit.MILLISECONDS)
                                                 }
                                                 SnackbarResult.Dismissed -> {
                                                 }
@@ -260,7 +269,7 @@ fun ProductList(
 
                         SwipeToDismiss(
                             state = dismissState,
-                            modifier = Modifier.padding(vertical = 8.dp),
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp),
                             directions = setOf(DismissDirection.StartToEnd),
                             dismissThresholds = { direction ->
                                 FractionalThreshold(0.65f)
