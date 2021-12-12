@@ -272,7 +272,7 @@ private fun ExpiryDateField(productParameters: ProductParameters) {
     SlimTextField(
         value = productParameters.expiryDate.value,
         onValueChange = {
-            val dateFormat = """\A\d{0,2}\Z|\A\d{1,2}[.]{1}\d{0,2}\Z|\A\d{1,2}[.]{1}\d{1,2}[.]{1}\d{0,4}\Z"""
+            val dateFormat = """\A\d{0,2}\Z|\A\d{0,2}[.]{1}\d{0,2}\Z|\A\d{0,2}[.]{1}\d{0,2}[.]{1}\d{0,4}\Z"""
             if (Regex(dateFormat).matches(it))
                 productParameters.expiryDate.value = it
         },
