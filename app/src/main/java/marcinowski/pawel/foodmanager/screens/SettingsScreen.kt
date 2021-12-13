@@ -1,10 +1,8 @@
 package marcinowski.pawel.foodmanager.screens
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -21,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import marcinowski.pawel.foodmanager.R
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(darkTheme: MutableState<Boolean>) {
     Column (Modifier.fillMaxHeight().fillMaxWidth()) {
         Card(
             shape = RectangleShape,
@@ -46,7 +44,7 @@ fun SettingsScreen() {
         Column (modifier = Modifier.fillMaxWidth()) {
             NotificationsSettings()
             Divider(thickness = 1.dp)
-            ThemeSettings()
+            ThemeSettings(darkTheme)
             Divider(thickness = 1.dp)
         }
     }
@@ -64,11 +62,11 @@ private fun NotificationsSettings() {
 }
 
 @Composable
-private fun ThemeSettings() {
+private fun ThemeSettings(darkTheme: MutableState<Boolean>) {
     val useSystemTheme = remember { mutableStateOf(true) }
     SectionHeader(stringResource(R.string.section_themes))
-    SystemThemeSwitch(useSystemTheme)
-    ApplicationThemeSwitch(useSystemTheme)
+    SystemThemeSwitch(useSystemTheme, darkTheme)
+    ApplicationThemeSwitch(useSystemTheme, darkTheme)
 }
 
 @Composable
@@ -106,6 +104,8 @@ private fun ShortDateNotificationsSwitch(useNotifications: MutableState<Boolean>
     ) {
         Text(
             stringResource(R.string.switch_short_date_notifications),
+            color = if (useNotifications.value) MaterialTheme.colors.onSurface
+            else MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
@@ -134,6 +134,8 @@ private fun DailyNotificationsSwitch(useNotifications: MutableState<Boolean>) {
     ) {
         Text(
             stringResource(R.string.switch_daily_notifications),
+            color = if (useNotifications.value) MaterialTheme.colors.onSurface
+            else MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
@@ -155,7 +157,10 @@ private fun DailyNotificationsSwitch(useNotifications: MutableState<Boolean>) {
 }
 
 @Composable
-private fun SystemThemeSwitch(useSystemTheme: MutableState<Boolean>) {
+private fun SystemThemeSwitch(
+    useSystemTheme: MutableState<Boolean>,
+    darkTheme: MutableState<Boolean>
+) {
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp)
     ) {
@@ -177,17 +182,25 @@ private fun SystemThemeSwitch(useSystemTheme: MutableState<Boolean>) {
                 .align(Alignment.CenterVertically)
                 .padding(start = 8.dp, end = 10.dp)
         )
+        if (useSystemTheme.value) {
+            darkTheme.value = isSystemInDarkTheme()
+        }
     }
 }
 
 @Composable
-private fun ApplicationThemeSwitch(useSystemTheme: MutableState<Boolean>) {
+private fun ApplicationThemeSwitch(
+    useSystemTheme: MutableState<Boolean>,
+    darkTheme: MutableState<Boolean>
+) {
     val useDarkTheme = remember { mutableStateOf(true) }
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp)
     ) {
         Text(
             stringResource(R.string.switch_use_dark_theme),
+            color = if (!useSystemTheme.value) MaterialTheme.colors.onSurface
+                    else MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
@@ -205,6 +218,9 @@ private fun ApplicationThemeSwitch(useSystemTheme: MutableState<Boolean>) {
                 .align(Alignment.CenterVertically)
                 .padding(start = 8.dp, end = 10.dp)
         )
+        if (!useSystemTheme.value) {
+            darkTheme.value = useDarkTheme.value
+        }
     }
 }
 

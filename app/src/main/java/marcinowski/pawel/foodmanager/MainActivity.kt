@@ -16,6 +16,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.*
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
@@ -32,11 +33,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FoodManagerTheme {
+            val darkTheme = remember { mutableStateOf(false) }
+            FoodManagerTheme (darkTheme.value) {
                 pagerState = rememberPagerState(initialPage = 1)
 
                 Surface(color = MaterialTheme.colors.background) {
-                    MainScreen(textureView, camera, pagerState!!)
+                    MainScreen(textureView, camera, pagerState!!, darkTheme)
                 }
             }
         }

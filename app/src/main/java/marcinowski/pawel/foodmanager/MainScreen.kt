@@ -24,7 +24,9 @@ import marcinowski.pawel.foodmanager.screens.SettingsScreen
 fun MainScreen(
     textureViewRef: MutableState<TextureView?>,
     camera: Camera,
-    pagerState: PagerState) {
+    pagerState: PagerState,
+    darkTheme: MutableState<Boolean>
+) {
 
 
 
@@ -36,7 +38,8 @@ fun MainScreen(
 
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(pagerState, previousRoute, currentRoute, camera) }
+        bottomBar = { BottomNavigationBar(pagerState, previousRoute, currentRoute, camera) },
+        backgroundColor = MaterialTheme.colors.background
     ) {
 
         HorizontalPager(count = 3, state = pagerState) {page ->
@@ -48,7 +51,7 @@ fun MainScreen(
                     HomeScreen()
                 }
                 2 -> {
-                    SettingsScreen()
+                    SettingsScreen(darkTheme)
                 }
             }
         }
