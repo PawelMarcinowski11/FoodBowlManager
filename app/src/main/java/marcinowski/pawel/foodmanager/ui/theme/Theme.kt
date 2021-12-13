@@ -1,6 +1,5 @@
 package marcinowski.pawel.foodmanager.ui.theme
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -8,35 +7,45 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColorPalette = darkColors(
-    primary = Color.LightGray,
-    primaryVariant = Color.Black,
-    secondary = Color.DarkGray
-)
-
 
 val Cactus = Color(0xFF68996E)
 val PaleCactus = Color(0xFFEAFBAA)
 val CharredDough = Color(0xFF2C1106)
 val Dough = Color(0xFF5C4126)
 val PaleDough = Color(0xFFFEFDFA)
+val CharredAsh = Color (0xFF090606)
+val Ash = Color (0xFF8E8383)
+val WhiteAsh = Color (0xFFD8D3D3)
+
+private val DarkColorPalette = darkColors(
+    primary = Cactus,
+
+    secondary = Ash,
+    secondaryVariant = Cactus,
+
+    background = CharredAsh,
+    surface = CharredAsh,
+
+    onPrimary = PaleCactus,
+    onSecondary = PaleCactus,
+    onBackground = WhiteAsh,
+    onSurface = WhiteAsh,
+)
 
 
-@SuppressLint("ConflictingOnColor")
 private val LightColorPalette = lightColors(
-    primary = Cactus, //Button, NavBar, kursor w TextForm
-    primaryVariant = Color.White, //nw
-    secondary = Dough, //RadioBox
-    secondaryVariant = Cactus, //Switch on
+    primary = Cactus,
 
-    background = PaleDough, //kolor tła
-    surface = PaleDough, //Card ma ten kolor
+    secondary = Dough,
+    secondaryVariant = Cactus,
 
-    onPrimary = PaleCactus, //Button click, Button text
-    onSecondary = Color.White, //???
-    onBackground = CharredDough, //napisy
-    onSurface = Dough, //ramka przy TextForm, Switch off
+    background = PaleDough,
+    surface = PaleDough,
 
+    onPrimary = PaleCactus,
+    onSecondary = PaleCactus,
+    onBackground = CharredDough,
+    onSurface = CharredDough,
 )
 
 @Composable
