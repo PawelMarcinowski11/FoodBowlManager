@@ -26,4 +26,12 @@
     <string name="header_product_list">Lista produktów</string>
     <string name="header_settings">Ustawienia</string>
     <string name="header_scan">Dodaj nowe produkty</string>
+    <string name="switch_notifications">Włącz powiadomienia</string>
+    <string name="switch_short_date_notifications">Krótki termin ważności</string>
+    <string name="switch_use_system_theme">Użyj motywu systemowego</string>
+    <string name="switch_use_dark_theme">Użyj ciemnego motywu</string>
+    <string name="switch_daily_notifications">Codziennie rano</string>
+    <string name="section_notifications">Powiadomienia</string>
+    <string name="section_notification_types">Rodzaje powiadomień</string>
+    <string name="section_themes">Motywy</string>
 </resources>
