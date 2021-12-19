@@ -3,24 +3,30 @@ package marcinowski.pawel.foodmanager.screens
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.R
+import marcinowski.pawel.foodmanager.dataStore
 
 @Composable
 fun SettingsScreen(darkTheme: MutableState<Boolean>) {
-    Column (Modifier.fillMaxHeight().fillMaxWidth()) {
+    Column (
+        Modifier
+            .fillMaxHeight()
+            .fillMaxWidth()) {
         Card(
             shape = RectangleShape,
             modifier = Modifier
@@ -52,7 +58,12 @@ fun SettingsScreen(darkTheme: MutableState<Boolean>) {
 
 @Composable
 private fun NotificationsSettings() {
-    val useNotifications = remember { mutableStateOf(true) }
+    val context = LocalContext.current
+    val useNotifications = remember { context.dataStore.data
+        .map { settings ->
+            settings[booleanPreferencesKey("useNotifications")] ?: true
+        }}.collectAsState(true)
+
     SectionHeader(stringResource(R.string.section_notifications))
     NotificationsSwitch(useNotifications)
     Divider(thickness = 1.dp)
@@ -63,16 +74,25 @@ private fun NotificationsSettings() {
 
 @Composable
 private fun ThemeSettings(darkTheme: MutableState<Boolean>) {
-    val useSystemTheme = remember { mutableStateOf(true) }
+    val context = LocalContext.current
+    val useSystemTheme = remember { context.dataStore.data
+        .map { settings ->
+            settings[booleanPreferencesKey("useSystemTheme")] ?: true
+        }}.collectAsState(true)
+
     SectionHeader(stringResource(R.string.section_themes))
     SystemThemeSwitch(useSystemTheme, darkTheme)
     ApplicationThemeSwitch(useSystemTheme, darkTheme)
 }
 
 @Composable
-private fun NotificationsSwitch(useNotifications: MutableState<Boolean>) {
+private fun NotificationsSwitch(useNotifications: State<Boolean>) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 24.dp)
     ) {
         Text(
             stringResource(R.string.switch_notifications),
@@ -84,7 +104,11 @@ private fun NotificationsSwitch(useNotifications: MutableState<Boolean>) {
         Switch(
             checked = useNotifications.value,
             onCheckedChange = { checked ->
-                useNotifications.value = checked
+                coroutineScope.launch {
+                    context.dataStore.edit { settings ->
+                        settings[booleanPreferencesKey("useNotifications")] = checked
+                    }
+                }
             },
             modifier = Modifier
                 .height(40.dp)
@@ -97,10 +121,17 @@ private fun NotificationsSwitch(useNotifications: MutableState<Boolean>) {
 
 
 @Composable
-private fun ShortDateNotificationsSwitch(useNotifications: MutableState<Boolean>) {
-    val notifyOnShortDate = remember { mutableStateOf(true) }
+private fun ShortDateNotificationsSwitch(useNotifications: State<Boolean>) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val notifyOnShortDate = remember { context.dataStore.data
+        .map { settings ->
+            settings[booleanPreferencesKey("notifyOnShortDate")] ?: true
+        }}.collectAsState(true)
     Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 24.dp)
     ) {
         Text(
             stringResource(R.string.switch_short_date_notifications),
@@ -115,7 +146,11 @@ private fun ShortDateNotificationsSwitch(useNotifications: MutableState<Boolean>
             enabled = useNotifications.value,
             checked = notifyOnShortDate.value,
             onCheckedChange = { checked ->
-                notifyOnShortDate.value = checked
+                coroutineScope.launch {
+                    context.dataStore.edit { settings ->
+                        settings[booleanPreferencesKey("notifyOnShortDate")] = checked
+                    }
+                }
             },
             modifier = Modifier
                 .height(40.dp)
@@ -127,10 +162,17 @@ private fun ShortDateNotificationsSwitch(useNotifications: MutableState<Boolean>
 }
 
 @Composable
-private fun DailyNotificationsSwitch(useNotifications: MutableState<Boolean>) {
-    val notifyDaily = remember { mutableStateOf(true) }
+private fun DailyNotificationsSwitch(useNotifications: State<Boolean>) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val notifyDaily = remember { context.dataStore.data
+        .map { settings ->
+            settings[booleanPreferencesKey("notifyDaily")] ?: true
+        }}.collectAsState(true)
     Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 24.dp)
     ) {
         Text(
             stringResource(R.string.switch_daily_notifications),
@@ -145,7 +187,11 @@ private fun DailyNotificationsSwitch(useNotifications: MutableState<Boolean>) {
             enabled = useNotifications.value,
             checked = notifyDaily.value,
             onCheckedChange = { checked ->
-                notifyDaily.value = checked
+                coroutineScope.launch {
+                    context.dataStore.edit { settings ->
+                        settings[booleanPreferencesKey("notifyDaily")] = checked
+                    }
+                }
             },
             modifier = Modifier
                 .height(40.dp)
@@ -158,11 +204,15 @@ private fun DailyNotificationsSwitch(useNotifications: MutableState<Boolean>) {
 
 @Composable
 private fun SystemThemeSwitch(
-    useSystemTheme: MutableState<Boolean>,
+    useSystemTheme: State<Boolean>,
     darkTheme: MutableState<Boolean>
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 24.dp)
     ) {
         Text(
             stringResource(R.string.switch_use_system_theme),
@@ -174,7 +224,11 @@ private fun SystemThemeSwitch(
         Switch(
             checked = useSystemTheme.value,
             onCheckedChange = { checked ->
-                useSystemTheme.value = checked
+                coroutineScope.launch {
+                    context.dataStore.edit { settings ->
+                        settings[booleanPreferencesKey("useSystemTheme")] = checked
+                    }
+                }
             },
             modifier = Modifier
                 .height(40.dp)
@@ -190,12 +244,20 @@ private fun SystemThemeSwitch(
 
 @Composable
 private fun ApplicationThemeSwitch(
-    useSystemTheme: MutableState<Boolean>,
+    useSystemTheme: State<Boolean>,
     darkTheme: MutableState<Boolean>
 ) {
-    val useDarkTheme = remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val useDarkTheme = remember { context.dataStore.data
+        .map { settings ->
+            settings[booleanPreferencesKey("useDarkTheme")] ?: true
+        }}.collectAsState(true)
+
     Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 24.dp)
     ) {
         Text(
             stringResource(R.string.switch_use_dark_theme),
@@ -210,7 +272,11 @@ private fun ApplicationThemeSwitch(
             enabled = !useSystemTheme.value,
             checked = useDarkTheme.value,
             onCheckedChange = { checked ->
-                useDarkTheme.value = checked
+                coroutineScope.launch {
+                    context.dataStore.edit { settings ->
+                        settings[booleanPreferencesKey("useDarkTheme")] = checked
+                    }
+                }
             },
             modifier = Modifier
                 .height(40.dp)

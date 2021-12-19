@@ -1,6 +1,7 @@
 package marcinowski.pawel.foodmanager
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.camera2.*
 import android.media.ImageReader
@@ -17,12 +18,19 @@ import androidx.compose.material.*
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.flow.map
 import marcinowski.pawel.foodmanager.ui.theme.FoodManagerTheme
 import java.io.File
 import java.util.*
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class MainActivity : ComponentActivity() {
 
@@ -32,6 +40,18 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPagerApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        val initialSystemTheme = this.dataStore.data
+            .map { preferences ->
+                preferences[booleanPreferencesKey("useSystemTheme")] ?: true
+            }
+        val initialDarkTheme = this.dataStore.data
+            .map { preferences ->
+                preferences[booleanPreferencesKey("useDarkTheme")] ?: false
+            }
+        //val initialSettings = InitialSettings(initialSystemTheme.first(), initialDarkTheme.first())
+
         setContent {
             val darkTheme = remember { mutableStateOf(false) }
             FoodManagerTheme (darkTheme.value) {
