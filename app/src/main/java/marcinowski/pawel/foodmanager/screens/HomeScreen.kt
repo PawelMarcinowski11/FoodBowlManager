@@ -46,7 +46,7 @@ fun HomeScreen() {
 
     val context = LocalContext.current
 
-    val productListState =  ( Products(context).getProducts().collectAsState(
+    val productListState = ( Products(context).getProducts().collectAsState(
         initial = null)
             )
 
@@ -199,6 +199,21 @@ fun ProductList(
             }
 
             var initialState = remember { mutableStateOf(true) }
+
+            if (productList.value?.size == 0 ?: false) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Text(
+                        text = stringResource(R.string.reminder_add_products),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(start = 16.dp, end = 16.dp)
+                    )
+                }
+            }
 
             LazyColumn(
                 state = state,

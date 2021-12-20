@@ -32,4 +32,5 @@
     <string name="section_notifications">Notifications</string>
     <string name="section_notification_types">Notification types</string>
     <string name="section_themes">Themes</string>
+    <string name="reminder_add_products">Your product list is empty. For now.</string>
 </resources>

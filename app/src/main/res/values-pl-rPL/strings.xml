@@ -34,4 +34,5 @@
     <string name="section_notifications">Powiadomienia</string>
     <string name="section_notification_types">Rodzaje powiadomień</string>
     <string name="section_themes">Motywy</string>
+    <string name="reminder_add_products">Twoja lista produktów jest pusta. Póki co.</string>
 </resources>
