@@ -16,6 +16,9 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import java.util.*
 
+
+
+
 class Camera(
     private var activity: MainActivity,
     private var context: Context
@@ -30,42 +33,37 @@ class Camera(
     private var imageDimension: Size? = null
     private var imageReader: ImageReader? = null
 
-    public var textureViewRef: TextureView? = null
+    var textureViewRef: TextureView? = null
 
     fun openCamera() {
         val manager = context.getSystemService(ComponentActivity.CAMERA_SERVICE) as CameraManager
 
-            try {
-                cameraId = manager.cameraIdList[0]
-                val characteristics = manager.getCameraCharacteristics(cameraId)
-                val resolutions =
-                    characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
-                for (resolution in resolutions.getOutputSizes(SurfaceTexture::class.java)) {
-                    if (resolution.height * 16 == resolution.width * 9 && resolution.height * resolution.width < 2500000) {
-                        imageDimension = resolution
-                        break
-                    }
+        try {
+            cameraId = manager.cameraIdList[0]
+            val characteristics = manager.getCameraCharacteristics(cameraId)
+            val resolutions =
+                characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+            for (resolution in resolutions.getOutputSizes(SurfaceTexture::class.java)) {
+                if (resolution.height * 16 == resolution.width * 9 && resolution.height * resolution.width < 2500000) {
+                    imageDimension = resolution
+                    break
                 }
+            }
 
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    activity,
+                    arrayOf(Manifest.permission.CAMERA),
+                    REQUEST_CAMERA_PERMISSION
+                )
+                return
+            }
+            manager.openCamera(cameraId, stateCallback, null)
 
-            //imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
-            // Add permission for camera and let user grant the permission
-                if (ActivityCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.CAMERA
-                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                        activity,
-                        arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                        REQUEST_CAMERA_PERMISSION
-                    )
-                    return
-                }
-                manager.openCamera(cameraId, stateCallback, null)
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
@@ -90,7 +88,6 @@ class Camera(
 
     private val stateCallback: CameraDevice.StateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
-            //This is called when the camera is open
             cameraDevice = camera
             createCameraPreview()
         }

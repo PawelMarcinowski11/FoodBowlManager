@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.R
 import marcinowski.pawel.foodmanager.dataStore
+import marcinowski.pawel.foodmanager.foodNotifications
 
 @Composable
 fun SettingsScreen(darkTheme: MutableState<Boolean>) {
@@ -68,8 +69,8 @@ private fun NotificationsSettings() {
     NotificationsSwitch(useNotifications)
     Divider(thickness = 1.dp)
     SectionHeader(stringResource(R.string.section_notification_types))
-    ShortDateNotificationsSwitch(useNotifications)
     DailyNotificationsSwitch(useNotifications)
+    ShortDateNotificationsSwitch(useNotifications)
 }
 
 @Composable
@@ -96,10 +97,11 @@ private fun NotificationsSwitch(useNotifications: State<Boolean>) {
     ) {
         Text(
             stringResource(R.string.switch_notifications),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Left,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(bottom = 2.dp, start = 10.dp)
+                .fillMaxWidth(0.7f)
         )
         Switch(
             checked = useNotifications.value,
@@ -107,6 +109,10 @@ private fun NotificationsSwitch(useNotifications: State<Boolean>) {
                 coroutineScope.launch {
                     context.dataStore.edit { settings ->
                         settings[booleanPreferencesKey("useNotifications")] = checked
+                        if (checked)
+                            foodNotifications().setNotifications(context, 7)
+                        else
+                            foodNotifications().cancelNotifications(context)
                     }
                 }
             },
@@ -126,8 +132,8 @@ private fun ShortDateNotificationsSwitch(useNotifications: State<Boolean>) {
     val context = LocalContext.current
     val notifyOnShortDate = remember { context.dataStore.data
         .map { settings ->
-            settings[booleanPreferencesKey("notifyOnShortDate")] ?: true
-        }}.collectAsState(true)
+            settings[booleanPreferencesKey("notifyOnShortDate")] ?: false
+        }}.collectAsState(false)
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
@@ -137,10 +143,11 @@ private fun ShortDateNotificationsSwitch(useNotifications: State<Boolean>) {
             stringResource(R.string.switch_short_date_notifications),
             color = if (useNotifications.value) MaterialTheme.colors.onSurface
             else MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Left,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(bottom = 2.dp, start = 10.dp)
+                .fillMaxWidth(0.7f)
         )
         Switch(
             enabled = useNotifications.value,
@@ -149,6 +156,8 @@ private fun ShortDateNotificationsSwitch(useNotifications: State<Boolean>) {
                 coroutineScope.launch {
                     context.dataStore.edit { settings ->
                         settings[booleanPreferencesKey("notifyOnShortDate")] = checked
+                        if (checked)
+                            settings[booleanPreferencesKey("notifyDaily")] = false
                     }
                 }
             },
@@ -178,10 +187,11 @@ private fun DailyNotificationsSwitch(useNotifications: State<Boolean>) {
             stringResource(R.string.switch_daily_notifications),
             color = if (useNotifications.value) MaterialTheme.colors.onSurface
             else MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Left,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(bottom = 2.dp, start = 10.dp)
+                .fillMaxWidth(0.7f)
         )
         Switch(
             enabled = useNotifications.value,
@@ -190,6 +200,8 @@ private fun DailyNotificationsSwitch(useNotifications: State<Boolean>) {
                 coroutineScope.launch {
                     context.dataStore.edit { settings ->
                         settings[booleanPreferencesKey("notifyDaily")] = checked
+                        if (checked)
+                            settings[booleanPreferencesKey("notifyOnShortDate")] = false
                     }
                 }
             },
@@ -216,10 +228,11 @@ private fun SystemThemeSwitch(
     ) {
         Text(
             stringResource(R.string.switch_use_system_theme),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Left,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(bottom = 2.dp, start = 10.dp)
+                .fillMaxWidth(0.7f)
         )
         Switch(
             checked = useSystemTheme.value,
@@ -263,10 +276,11 @@ private fun ApplicationThemeSwitch(
             stringResource(R.string.switch_use_dark_theme),
             color = if (!useSystemTheme.value) MaterialTheme.colors.onSurface
                     else MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Left,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(bottom = 2.dp, start = 10.dp)
+                .fillMaxWidth(0.7f)
         )
         Switch(
             enabled = !useSystemTheme.value,

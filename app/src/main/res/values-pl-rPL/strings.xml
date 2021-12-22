@@ -27,7 +27,7 @@
     <string name="header_settings">Ustawienia</string>
     <string name="header_scan">Dodaj nowe produkty</string>
     <string name="switch_notifications">Włącz powiadomienia</string>
-    <string name="switch_short_date_notifications">Krótki termin ważności</string>
+    <string name="switch_short_date_notifications">Wyłącznie przy krótkim terminie ważności</string>
     <string name="switch_use_system_theme">Użyj motywu systemowego</string>
     <string name="switch_use_dark_theme">Użyj ciemnego motywu</string>
     <string name="switch_daily_notifications">Codziennie rano</string>
@@ -35,4 +35,11 @@
     <string name="section_notification_types">Rodzaje powiadomień</string>
     <string name="section_themes">Motywy</string>
     <string name="reminder_add_products">Twoja lista produktów jest pusta. Póki co.</string>
+    <string name="notification_title_short_date">Twoje produkty są bliskie przeterminowania się!</string>
+    <string name="notification_content_short_expiry_date">Produkty z krótką datą ważności:</string>
+    <string name="notification_content_short_date_more">… i jeszcze %1$d</string>
+    <string name="notification_content_daily_reminder">Produkty z najkrótszą datą ważności:</string>
+    <string name="notification_content_daily_no_products">Dodaj zakupione produkty, aby łatwiej nimi zarządzać.</string>
+    <string name="notification_title_daily_reminder">Aby unikać marnowania żywności, warto najpierw spożyć produkty z krótszą datą.</string>
+    <string name="notification_main_title">Nie marnuj jedzenia!</string>
 </resources>

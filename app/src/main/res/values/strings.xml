@@ -25,7 +25,7 @@
     <string name="header_scan">Add new products</string>
     <string name="toast_added_product">Added a new product</string>
     <string name="switch_notifications">Turn on notifications</string>
-    <string name="switch_short_date_notifications">Short expiry date</string>
+    <string name="switch_short_date_notifications">Exclusively on short expiry date</string>
     <string name="switch_daily_notifications">Every morning</string>
     <string name="switch_use_system_theme">Use system theme</string>
     <string name="switch_use_dark_theme">Use dark theme</string>
@@ -33,4 +33,11 @@
     <string name="section_notification_types">Notification types</string>
     <string name="section_themes">Themes</string>
     <string name="reminder_add_products">Your product list is empty. For now.</string>
+    <string name="notification_title_short_date">Your products will expire soon!</string>
+    <string name="notification_content_short_expiry_date">Products with short expiry date:</string>
+    <string name="notification_content_short_date_more">… and %1$d more</string>
+    <string name="notification_content_daily_reminder">Products with the shortest expiry date:</string>
+    <string name="notification_content_daily_no_products">Add your products to make managing them easier.</string>
+    <string name="notification_title_daily_reminder">To avoid wasting food, it is a good idea to consume products with a shorter date first.</string>
+    <string name="notification_main_title">Don\'t waste your food!</string>
 </resources>

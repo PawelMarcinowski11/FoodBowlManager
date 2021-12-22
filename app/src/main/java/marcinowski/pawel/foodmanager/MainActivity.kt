@@ -3,18 +3,15 @@ package marcinowski.pawel.foodmanager
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.hardware.camera2.*
-import android.media.ImageReader
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.Size
 import android.util.SparseIntArray
 import android.view.TextureView
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,9 +22,12 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.ui.theme.FoodManagerTheme
-import java.io.File
 import java.util.*
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -41,16 +41,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val useNotifications = this.dataStore.data
+            .map { settings ->
+                settings[booleanPreferencesKey("useNotifications")] ?: true
+            }
 
-        val initialSystemTheme = this.dataStore.data
-            .map { preferences ->
-                preferences[booleanPreferencesKey("useSystemTheme")] ?: true
-            }
-        val initialDarkTheme = this.dataStore.data
-            .map { preferences ->
-                preferences[booleanPreferencesKey("useDarkTheme")] ?: false
-            }
-        //val initialSettings = InitialSettings(initialSystemTheme.first(), initialDarkTheme.first())
+        CoroutineScope(Dispatchers.IO).launch {
+            if (useNotifications.first())
+                foodNotifications().setNotifications(this@MainActivity, 7)
+        }
 
         setContent {
             val darkTheme = remember { mutableStateOf(false) }
@@ -71,23 +70,17 @@ class MainActivity : ComponentActivity() {
         WRITE_DATA
     }
 
+
+
+
+
+
     private val camera = Camera(this, this)
-
-    private var count = 0
-
     private var textureView: MutableState<TextureView?> = mutableStateOf(null)
 
-    lateinit var cameraId: String
-    protected var cameraDevice: CameraDevice? = null
-    protected var cameraCaptureSessions: CameraCaptureSession? = null
-    protected var captureRequestBuilder: CaptureRequest.Builder? = null
-    public var imageDimension: Size? = null
-    private var imageReader: ImageReader? = null
-    private val file: File? = null
-    public var mBackgroundHandler: Handler? = null
-    private var mBackgroundThread: HandlerThread? = null
-    private data class referenceBool (var value: Boolean)
 
+    var mBackgroundHandler: Handler? = null
+    private var mBackgroundThread: HandlerThread? = null
 
 
     protected fun startBackgroundThread() {
@@ -120,6 +113,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @ExperimentalPagerApi
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -127,14 +121,10 @@ class MainActivity : ComponentActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                // close the app
-                Toast.makeText(
-                    this@MainActivity,
-                    "Sorry!!!, you can't use this app without granting permission",
-                    Toast.LENGTH_LONG
-                ).show()
-                finish()
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (pagerState?.currentPage == 0) {
+                    camera.openCamera()
+                }
             }
         }
     }
@@ -143,10 +133,13 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         startBackgroundThread()
+    }
 
+    @OptIn(ExperimentalPagerApi::class)
+    override fun onRestart() {
+        super.onRestart()
         if (pagerState?.currentPage == 0) {
-            //if (textureView.value?.isAvailable == true)
-                camera.openCamera()
+            camera.openCamera()
         }
     }
 
