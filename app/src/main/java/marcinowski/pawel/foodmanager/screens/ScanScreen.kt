@@ -31,6 +31,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.*
 import marcinowski.pawel.foodmanager.R
+import marcinowski.pawel.foodmanager.data_capturing.Camera
+import marcinowski.pawel.foodmanager.data_capturing.ImageProcessing
+import marcinowski.pawel.foodmanager.data_capturing.lookUpProductName
+import marcinowski.pawel.foodmanager.storage.Barcodes
+import marcinowski.pawel.foodmanager.storage.Products
+import marcinowski.pawel.foodmanager.utils.ProductParameters
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

@@ -1,4 +1,4 @@
-package marcinowski.pawel.foodmanager
+package marcinowski.pawel.foodmanager.utils
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

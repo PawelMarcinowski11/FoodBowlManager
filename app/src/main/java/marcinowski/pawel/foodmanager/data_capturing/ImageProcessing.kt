@@ -1,4 +1,4 @@
-package marcinowski.pawel.foodmanager
+package marcinowski.pawel.foodmanager.data_capturing
 
 import android.content.Context
 import android.graphics.SurfaceTexture
@@ -14,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
+import marcinowski.pawel.foodmanager.storage.Barcodes
+import marcinowski.pawel.foodmanager.utils.ProductParameters
 
 class ImageProcessing(
     private var textureViewRef: TextureView?,

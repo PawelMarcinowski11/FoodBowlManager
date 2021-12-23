@@ -1,4 +1,4 @@
-package marcinowski.pawel.foodmanager
+package marcinowski.pawel.foodmanager.data_capturing
 
 import android.Manifest
 import android.content.Context
@@ -14,6 +14,7 @@ import android.view.TextureView
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
+import marcinowski.pawel.foodmanager.MainActivity
 import java.util.*
 
 

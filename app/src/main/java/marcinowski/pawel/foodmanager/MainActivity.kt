@@ -7,12 +7,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.SparseIntArray
-import android.view.TextureView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.datastore.core.DataStore
@@ -27,6 +25,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import marcinowski.pawel.foodmanager.data_capturing.Camera
+import marcinowski.pawel.foodmanager.screens.MainScreen
 import marcinowski.pawel.foodmanager.ui.theme.FoodManagerTheme
 import java.util.*
 
@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 pagerState = rememberPagerState(initialPage = 1)
 
                 Surface(color = MaterialTheme.colors.background) {
-                    MainScreen(textureView, camera, pagerState!!, darkTheme)
+                    MainScreen(camera, pagerState!!, darkTheme)
                 }
             }
         }
@@ -76,7 +76,6 @@ class MainActivity : ComponentActivity() {
 
 
     private val camera = Camera(this, this)
-    private var textureView: MutableState<TextureView?> = mutableStateOf(null)
 
 
     var mBackgroundHandler: Handler? = null
@@ -101,7 +100,6 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        private const val TAG = "AndroidCameraApi"
         private val ORIENTATIONS = SparseIntArray()
         private const val REQUEST_CAMERA_PERMISSION = 200
 

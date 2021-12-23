@@ -1,9 +1,10 @@
-package marcinowski.pawel.foodmanager
+package marcinowski.pawel.foodmanager.data_capturing
 
 import android.app.Activity
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
+import marcinowski.pawel.foodmanager.R
 import org.json.JSONObject
 import org.json.JSONTokener
 import java.net.URL

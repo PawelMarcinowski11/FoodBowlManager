@@ -26,8 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import marcinowski.pawel.foodmanager.*
 import marcinowski.pawel.foodmanager.R
+import marcinowski.pawel.foodmanager.storage.Barcodes
+import marcinowski.pawel.foodmanager.storage.Products
+import marcinowski.pawel.foodmanager.utils.Product
+import marcinowski.pawel.foodmanager.utils.ProductParameters
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors

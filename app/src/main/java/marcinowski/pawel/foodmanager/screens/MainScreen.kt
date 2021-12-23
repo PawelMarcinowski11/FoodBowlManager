@@ -1,6 +1,5 @@
-package marcinowski.pawel.foodmanager
+package marcinowski.pawel.foodmanager.screens
 
-import android.view.TextureView
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -14,7 +13,9 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
+import marcinowski.pawel.foodmanager.data_capturing.Camera
 import marcinowski.pawel.foodmanager.screens.HomeScreen
+import marcinowski.pawel.foodmanager.screens.NavigationItem
 import marcinowski.pawel.foodmanager.screens.ScanScreen
 import marcinowski.pawel.foodmanager.screens.SettingsScreen
 
@@ -22,7 +23,6 @@ import marcinowski.pawel.foodmanager.screens.SettingsScreen
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun MainScreen(
-    textureViewRef: MutableState<TextureView?>,
     camera: Camera,
     pagerState: PagerState,
     darkTheme: MutableState<Boolean>

@@ -1,4 +1,4 @@
-package marcinowski.pawel.foodmanager
+package marcinowski.pawel.foodmanager.storage
 
 import android.content.Context
 import androidx.datastore.core.CorruptionException
@@ -8,6 +8,9 @@ import androidx.datastore.dataStore
 import androidx.datastore.preferences.protobuf.InvalidProtocolBufferException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import marcinowski.pawel.foodmanager.BarcodeEntry
+import marcinowski.pawel.foodmanager.BarcodeStorage
+import marcinowski.pawel.foodmanager.utils.Barcode
 import java.io.InputStream
 import java.io.OutputStream
 
