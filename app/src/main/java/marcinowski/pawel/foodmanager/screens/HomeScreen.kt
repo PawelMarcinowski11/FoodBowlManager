@@ -40,30 +40,20 @@ import java.util.concurrent.TimeUnit
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen() {
-
     val productParameters = remember { ProductParameters() }
-
     val drawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
-
     val coroutineScope = rememberCoroutineScope()
-
     val context = LocalContext.current
-
     val productListState = ( Products(context).getProducts().collectAsState(
         initial = null)
             )
-
-    val productList = productListState
-
     val focusManager = LocalFocusManager.current
-
     BackHandler(enabled = !drawerState.isClosed) {
         coroutineScope.launch{
             focusManager.clearFocus()
             drawerState.close()
         }
     }
-
     BottomDrawer(
         gesturesEnabled = !drawerState.isClosed,
         drawerState = drawerState,
@@ -87,7 +77,6 @@ fun HomeScreen() {
                     params = productParameters,
                     mode = Mode.Edit,
                     onClick = {
-
                         coroutineScope.launch {
                             if (productParameters.productName.value.trim() == "") {
                                 Toast.makeText(
@@ -98,42 +87,36 @@ fun HomeScreen() {
                             } else {
                                 try {
                                     val parsedDate: LocalDate
-
                                     val year = productParameters.expiryDate.value.substringAfterLast('.')
-
-                                    if (year.length == 2) {
-                                        parsedDate = LocalDate.parse(
+                                    parsedDate = if (year.length == 2) {
+                                        LocalDate.parse(
                                             productParameters.expiryDate.value,
                                             DateTimeFormatter.ofPattern("d.M.yy")
                                         )
-                                    }
-                                    else {
-                                        parsedDate = LocalDate.parse(
+                                    } else {
+                                        LocalDate.parse(
                                             productParameters.expiryDate.value,
                                             DateTimeFormatter.ofPattern("d.M.yyyy")
                                         )
                                     }
-
                                     Products(context).updateProduct(
                                         productParameters.productName.value,
                                         productParameters.barcodeNumber.value,
                                         productParameters.id.value,
                                         parsedDate
                                     )
-
                                     if (productParameters.barcodeNumber.value != "") {
                                         Barcodes(context).updateBarcode(
                                             productParameters.productName.value,
                                             productParameters.barcodeNumber.value
                                         )
                                     }
-
                                     focusManager.clearFocus()
                                     drawerState.close()
                                 } catch (e: Exception) {
                                     Toast.makeText(
                                         context,
-                                        context.getResources()
+                                        context.resources
                                             .getString(R.string.toast_invalid_parameters),
                                         Toast.LENGTH_SHORT
                                     ).show()
@@ -146,11 +129,10 @@ fun HomeScreen() {
             }
         },
         content = {
-            ProductList(drawerState, productParameters, productList)
+            ProductList(drawerState, productParameters, productListState)
         }
     )
 }
-
 
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
@@ -160,21 +142,12 @@ fun ProductList(
     productParameters: ProductParameters,
     productList: State<List<Product>?>
 ) {
-
     val state = rememberLazyListState()
-
     val coroutineScope= rememberCoroutineScope()
-
     val context = LocalContext.current
-
-    //var previouslyRemoved = remember { Product("empty", "barcode", UUID.randomUUID()) }
-
     var previouslyRemoved: Product
-
     val snackState = remember { SnackbarHostState() }
-
     val snackScope = rememberCoroutineScope()
-
     Box (
         Modifier
             .fillMaxSize()
@@ -200,9 +173,7 @@ fun ProductList(
                     )
                 }
             }
-
-            var initialState = remember { mutableStateOf(true) }
-
+            val initialState = remember { mutableStateOf(true) }
             if (productList.value?.size == 0 ?: false) {
                 Box(
                     modifier = Modifier
@@ -217,7 +188,6 @@ fun ProductList(
                     )
                 }
             }
-
             LazyColumn(
                 state = state,
                 modifier = Modifier
@@ -225,19 +195,14 @@ fun ProductList(
                     .fillMaxWidth()
                     .fillMaxHeight(1.0f)
             ) {
-
                 items(items = productList.value ?: listOf(), key = { index -> index.id }) { item ->
-
                     val animVisibleState = remember { MutableTransitionState(initialState.value) }
                         .apply { targetState = true }
-
                     AnimatedVisibility(
                         visibleState = animVisibleState,
                         enter = expandVertically(),
                         exit = shrinkVertically()
                     ) {
-
-
                         val dismissState = rememberDismissState(
                             confirmStateChange = {
                                 if (it == DismissValue.DismissedToEnd)
@@ -245,51 +210,42 @@ fun ProductList(
                                 true
                             }
                         )
-
                         if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
-
-                            if (true) {
-
-                                coroutineScope.launch {
-
-                                    previouslyRemoved = item
-                                    Products(context).removeProduct(item.id)
-
-                                    if (snackState.currentSnackbarData == null) {
-                                        snackScope.launch {
-                                            val result = snackState
-                                                .showSnackbar(
-                                                    message = context.resources.getString(R.string.snackbar_product_removal),
-                                                    actionLabel = context.resources.getString(R.string.snackbar_button_undo),
-                                                    duration = SnackbarDuration.Long
+                            coroutineScope.launch {
+                                previouslyRemoved = item
+                                Products(context).removeProduct(item.id)
+                                if (snackState.currentSnackbarData == null) {
+                                    snackScope.launch {
+                                        val result = snackState
+                                            .showSnackbar(
+                                                message = context.resources.getString(R.string.snackbar_product_removal),
+                                                actionLabel = context.resources.getString(R.string.snackbar_button_undo),
+                                                duration = SnackbarDuration.Long
+                                            )
+                                        when (result) {
+                                            SnackbarResult.ActionPerformed -> {
+                                                initialState.value = false
+                                                Products(context).saveProduct(
+                                                    previouslyRemoved.name,
+                                                    previouslyRemoved.barcodeNumber,
+                                                    previouslyRemoved.expiryDate!!
                                                 )
-                                            when (result) {
-                                                SnackbarResult.ActionPerformed -> {
-                                                    initialState.value = false
-                                                    Products(context).saveProduct(
-                                                        previouslyRemoved.name,
-                                                        previouslyRemoved.barcodeNumber,
-                                                        previouslyRemoved.expiryDate!!
-                                                    )
-                                                    Executors.newSingleThreadScheduledExecutor().schedule({
-                                                        initialState.value = true
-                                                    }, 300, TimeUnit.MILLISECONDS)
-                                                }
-                                                SnackbarResult.Dismissed -> {
-                                                }
+                                                Executors.newSingleThreadScheduledExecutor().schedule({
+                                                    initialState.value = true
+                                                }, 300, TimeUnit.MILLISECONDS)
+                                            }
+                                            SnackbarResult.Dismissed -> {
                                             }
                                         }
                                     }
                                 }
                             }
-
                         }
-
                         SwipeToDismiss(
                             state = dismissState,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp),
                             directions = setOf(DismissDirection.StartToEnd),
-                            dismissThresholds = { direction ->
+                            dismissThresholds = {
                                 FractionalThreshold(0.65f)
                             },
                             background = {
@@ -316,13 +272,12 @@ fun ProductList(
                                                 color = MaterialTheme.colors.onBackground
                                             )
                                             Text(
-                                                "Najlepiej spożyć przed: " + item.expiryDate?.format(
+                                                stringResource(R.string.text_best_consume_before) + item.expiryDate?.format(
                                                     DateTimeFormatter.ofPattern("dd.MM.yyyy")
                                                 ),
                                                 color = MaterialTheme.colors.onSurface
                                             )
                                         }
-
                                         IconButton(
                                             onClick = {
                                                 coroutineScope.launch {
@@ -346,7 +301,6 @@ fun ProductList(
                                                 modifier = Modifier
                                             )
                                         }
-
                                         IconButton(
                                             onClick = {
                                                 animVisibleState.targetState = false

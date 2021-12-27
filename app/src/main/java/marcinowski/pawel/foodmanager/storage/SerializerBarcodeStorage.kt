@@ -16,7 +16,6 @@ import java.io.OutputStream
 
 object SerializerBarcodeStorage : Serializer<BarcodeStorage> {
     override val defaultValue: BarcodeStorage = BarcodeStorage.getDefaultInstance()
-
     override suspend fun readFrom(input: InputStream): BarcodeStorage {
         try {
             return BarcodeStorage.parseFrom(input)
@@ -24,7 +23,6 @@ object SerializerBarcodeStorage : Serializer<BarcodeStorage> {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
-
     override suspend fun writeTo(t: BarcodeStorage, output: OutputStream) = t.writeTo(output)
 }
 
@@ -38,14 +36,9 @@ class Barcodes(private val context: Context) {
         )
     }
 
-    suspend fun clearBarcodes() {
-        context.barcodeProtoDataStore.updateData { data -> data.toBuilder().clearEntries().build() }
-    }
-
     fun getBarcodes(): Flow<List<Barcode>> {
         return context.barcodeProtoDataStore.data.map { barcodes ->
             val barcodeList: MutableList<Barcode> = mutableListOf()
-
             barcodes.entriesList.forEach {
                 barcodeList.add(
                     Barcode(
@@ -54,7 +47,6 @@ class Barcodes(private val context: Context) {
                     )
                 )
             }
-
             barcodeList
         }
     }
@@ -83,5 +75,9 @@ class Barcodes(private val context: Context) {
                     ?.build()
             ).build()
         }
+    }
+
+    suspend fun clearBarcodes() {
+        context.barcodeProtoDataStore.updateData { data -> data.toBuilder().clearEntries().build() }
     }
 }

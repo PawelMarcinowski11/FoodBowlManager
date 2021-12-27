@@ -40,4 +40,5 @@
     <string name="notification_content_daily_no_products">Add your products to make managing them easier.</string>
     <string name="notification_title_daily_reminder">To avoid wasting food, it is a good idea to consume products with a shorter date first.</string>
     <string name="notification_main_title">Don\'t waste your food!</string>
+    <string name="text_best_consume_before">"Best consumed before: "</string>
 </resources>

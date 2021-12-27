@@ -15,22 +15,18 @@ import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import marcinowski.pawel.foodmanager.MainActivity
-import java.util.*
-
-
-
 
 class Camera(
     private var activity: MainActivity,
     private var context: Context
 ) {
 
-    val REQUEST_CAMERA_PERMISSION = 200
+    private val REQUEST_CAMERA_PERMISSION = 200
 
-    lateinit var cameraId: String
-    protected var cameraDevice: CameraDevice? = null
-    protected var cameraCaptureSessions: CameraCaptureSession? = null
-    protected var captureRequestBuilder: CaptureRequest.Builder? = null
+    private lateinit var cameraId: String
+    private var cameraDevice: CameraDevice? = null
+    private var cameraCaptureSessions: CameraCaptureSession? = null
+    private var captureRequestBuilder: CaptureRequest.Builder? = null
     private var imageDimension: Size? = null
     private var imageReader: ImageReader? = null
 
@@ -71,8 +67,6 @@ class Camera(
         textureViewRef?.alpha = 1.0f
     }
 
-
-
     fun closeCamera() {
         textureViewRef?.alpha = 0f
         if (null != cameraDevice) {
@@ -84,8 +78,6 @@ class Camera(
             imageReader = null
         }
     }
-
-
 
     private val stateCallback: CameraDevice.StateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
@@ -103,7 +95,7 @@ class Camera(
         }
     }
 
-    protected fun createCameraPreview() {
+    private fun createCameraPreview() {
         try {
             val texture = textureViewRef?.surfaceTexture!!
             texture.setDefaultBufferSize(imageDimension!!.width, imageDimension!!.height)
@@ -115,46 +107,36 @@ class Camera(
             cameraDevice!!.createCaptureSession(
                 SessionConfiguration(
                     SessionConfiguration.SESSION_REGULAR,
-                    Arrays.asList(OutputConfiguration(surface)),
+                    listOf(OutputConfiguration(surface)),
                     HandlerExecutor(Looper.getMainLooper()),
                     object : CameraCaptureSession.StateCallback() {
                         override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
-                            //The camera is already closed
                             if (null == cameraDevice) {
                                 return
                             }
-                            // When the session is ready, we start displaying the preview.
                             cameraCaptureSessions = cameraCaptureSession
                             updatePreview()
                         }
-
                         override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
                         }
                     }
                 )
             )
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    protected fun updatePreview() {
-        //if (null == cameraDevice) {
-        //}
+    private fun updatePreview() {
         captureRequestBuilder!!.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
         try {
             cameraCaptureSessions!!.setRepeatingRequest(
                 captureRequestBuilder!!.build(),
                 null,
-                //Handler(Looper.getMainLooper())
                 activity.mBackgroundHandler
             )
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
     }
-
-
-
 }

@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.data_capturing.Camera
+import marcinowski.pawel.foodmanager.notifications.FoodNotifications
 import marcinowski.pawel.foodmanager.screens.MainScreen
 import marcinowski.pawel.foodmanager.ui.theme.FoodManagerTheme
 import java.util.*
@@ -33,36 +34,30 @@ import java.util.*
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class MainActivity : ComponentActivity() {
-
     @OptIn(ExperimentalPagerApi::class)
     var pagerState: PagerState? = null
 
     @OptIn(ExperimentalPagerApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val useNotifications = this.dataStore.data
             .map { settings ->
                 settings[booleanPreferencesKey("useNotifications")] ?: true
             }
-
         CoroutineScope(Dispatchers.IO).launch {
             if (useNotifications.first())
-                foodNotifications().setNotifications(this@MainActivity, 7)
+                FoodNotifications().setNotifications(this@MainActivity, 7)
         }
-
         setContent {
             val darkTheme = remember { mutableStateOf(false) }
             FoodManagerTheme (darkTheme.value) {
                 pagerState = rememberPagerState(initialPage = 1)
-
                 Surface(color = MaterialTheme.colors.background) {
                     MainScreen(camera, pagerState!!, darkTheme)
                 }
             }
         }
         checkAndRequestPermissionsFor(arrayListOf(UserPermission.CAMERA, UserPermission.WRITE_DATA))
-
     }
 
     enum class UserPermission{
@@ -70,25 +65,17 @@ class MainActivity : ComponentActivity() {
         WRITE_DATA
     }
 
-
-
-
-
-
     private val camera = Camera(this, this)
-
-
     var mBackgroundHandler: Handler? = null
     private var mBackgroundThread: HandlerThread? = null
 
-
-    protected fun startBackgroundThread() {
+    private fun startBackgroundThread() {
         mBackgroundThread = HandlerThread("Camera Background")
         mBackgroundThread!!.start()
         mBackgroundHandler = Handler(mBackgroundThread!!.looper)
     }
 
-    protected fun stopBackgroundThread() {
+    private fun stopBackgroundThread() {
         mBackgroundThread!!.quitSafely()
         try {
             mBackgroundThread!!.join()
@@ -102,7 +89,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         private val ORIENTATIONS = SparseIntArray()
         private const val REQUEST_CAMERA_PERMISSION = 200
-
         init {
             ORIENTATIONS.append(android.view.Surface.ROTATION_0, 90)
             ORIENTATIONS.append(android.view.Surface.ROTATION_90, 0)
@@ -144,112 +130,53 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPagerApi::class)
     override fun onPause() {
         if (pagerState?.currentPage == 0) {
-            camera.closeCamera();
+            camera.closeCamera()
         }
         stopBackgroundThread()
         super.onPause()
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /***
-     *      _____                    _         _
-     *     |  __ \                  (_)       (_)
-     *     | |__) ___ _ __ _ __ ___  _ ___ ___ _  ___  _ __  ___
-     *     |  ___/ _ | '__| '_ ` _ \| / __/ __| |/ _ \| '_ \/ __|
-     *     | |  |  __| |  | | | | | | \__ \__ | | (_) | | | \__ \
-     *     |_|   \___|_|  |_| |_| |_|_|___|___|_|\___/|_| |_|___/
-     *
-     *
-     */
-
     private fun checkAndRequestPermissionsFor(items: ArrayList<UserPermission>){
-
-        var itemsRequirePermission = ArrayList<UserPermission>()
+        val itemsRequirePermission = ArrayList<UserPermission>()
         for (item in items){
-
             if (!hasPermissionFor(item)){
                 itemsRequirePermission.add(item)
             }
         }
-        if (!itemsRequirePermission.isEmpty()){
+        if (itemsRequirePermission.isNotEmpty()){
             requestPermissionFor(itemsRequirePermission)
         }
-
     }
 
-    private fun hasPermissionFor(item: UserPermission): Boolean{
-
-        var isPermitted = false
-        when (item){
-
-            UserPermission.CAMERA ->{
-
-                isPermitted = this.checkSelfPermission(Manifest.permission.CAMERA) === PackageManager.PERMISSION_GRANTED
-
+    private fun hasPermissionFor(item: UserPermission): Boolean {
+        return when (item) {
+            UserPermission.CAMERA -> {
+                checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
             }
-            UserPermission.WRITE_DATA ->{
-                isPermitted = this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            UserPermission.WRITE_DATA -> {
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
             }
         }
-        return isPermitted
     }
+
     private fun requestPermissionFor(items: ArrayList<UserPermission>){
-
-        var manisfestInfo = ArrayList<String>()
-        for (item in items){
-
-            manisfestInfo.add(getManisfestInfoFor(item))
-
+        val manifestInfo = ArrayList<String>()
+        for (item in items) {
+            manifestInfo.add(getManifestInfoFor(item))
         }
-        val arrayOfPermissionItems = arrayOfNulls<String>(manisfestInfo.size)
-        manisfestInfo.toArray(arrayOfPermissionItems)
+        val arrayOfPermissionItems = arrayOfNulls<String>(manifestInfo.size)
+        manifestInfo.toArray(arrayOfPermissionItems)
         this.requestPermissions(arrayOfPermissionItems, 2)
-
     }
 
-    private fun getManisfestInfoFor(item: UserPermission): String{
-
-        var manifestString = ""
-        when (item){
-
-            UserPermission.CAMERA ->{
-
-                manifestString = Manifest.permission.CAMERA
-                //this.requestPermissions(arrayOf<String>(Manifest.permission.CAMERA), 1)
-
+    private fun getManifestInfoFor(item: UserPermission): String {
+        return when (item) {
+            UserPermission.CAMERA -> {
+                Manifest.permission.CAMERA
             }
-            UserPermission.WRITE_DATA ->{
-                manifestString = Manifest.permission.WRITE_EXTERNAL_STORAGE
-                //this.requestPermissions(arrayOf<String>(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE), 2)
+            UserPermission.WRITE_DATA -> {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
             }
         }
-        return manifestString
     }
-
-
-    private fun showAlert(message: String) {
-        val dialog = android.app.AlertDialog.Builder(this)
-        dialog.setTitle("Recognized Text")
-        dialog.setMessage(message)
-        dialog.setPositiveButton(" OK ",
-            { dialog, id -> dialog.dismiss() })
-        dialog.show()
-
-    }
-
 }

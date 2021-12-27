@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.R
 import marcinowski.pawel.foodmanager.dataStore
-import marcinowski.pawel.foodmanager.foodNotifications
+import marcinowski.pawel.foodmanager.notifications.FoodNotifications
 
 @Composable
 fun SettingsScreen(darkTheme: MutableState<Boolean>) {
@@ -64,7 +64,6 @@ private fun NotificationsSettings() {
         .map { settings ->
             settings[booleanPreferencesKey("useNotifications")] ?: true
         }}.collectAsState(true)
-
     SectionHeader(stringResource(R.string.section_notifications))
     NotificationsSwitch(useNotifications)
     Divider(thickness = 1.dp)
@@ -80,7 +79,6 @@ private fun ThemeSettings(darkTheme: MutableState<Boolean>) {
         .map { settings ->
             settings[booleanPreferencesKey("useSystemTheme")] ?: true
         }}.collectAsState(true)
-
     SectionHeader(stringResource(R.string.section_themes))
     SystemThemeSwitch(useSystemTheme, darkTheme)
     ApplicationThemeSwitch(useSystemTheme, darkTheme)
@@ -110,9 +108,9 @@ private fun NotificationsSwitch(useNotifications: State<Boolean>) {
                     context.dataStore.edit { settings ->
                         settings[booleanPreferencesKey("useNotifications")] = checked
                         if (checked)
-                            foodNotifications().setNotifications(context, 7)
+                            FoodNotifications().setNotifications(context, 7)
                         else
-                            foodNotifications().cancelNotifications(context)
+                            FoodNotifications().cancelNotifications(context)
                     }
                 }
             },
@@ -124,7 +122,6 @@ private fun NotificationsSwitch(useNotifications: State<Boolean>) {
         )
     }
 }
-
 
 @Composable
 private fun ShortDateNotificationsSwitch(useNotifications: State<Boolean>) {

@@ -42,4 +42,5 @@
     <string name="notification_content_daily_no_products">Dodaj zakupione produkty, aby łatwiej nimi zarządzać.</string>
     <string name="notification_title_daily_reminder">Aby unikać marnowania żywności, warto najpierw spożyć produkty z krótszą datą.</string>
     <string name="notification_main_title">Nie marnuj jedzenia!</string>
+    <string name="text_best_consume_before">"Najlepiej spożyć przed: "</string>
 </resources>

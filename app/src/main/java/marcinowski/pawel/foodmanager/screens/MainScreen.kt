@@ -14,11 +14,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.data_capturing.Camera
-import marcinowski.pawel.foodmanager.screens.HomeScreen
-import marcinowski.pawel.foodmanager.screens.NavigationItem
-import marcinowski.pawel.foodmanager.screens.ScanScreen
-import marcinowski.pawel.foodmanager.screens.SettingsScreen
-
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -27,22 +22,13 @@ fun MainScreen(
     pagerState: PagerState,
     darkTheme: MutableState<Boolean>
 ) {
-
-
-
-
     val previousRoute = rememberSaveable { mutableStateOf(1) }
     val currentRoute = rememberSaveable { mutableStateOf(1) }
-
-
-
-
     Scaffold(
         bottomBar = { BottomNavigationBar(pagerState, previousRoute, currentRoute, camera) },
         backgroundColor = MaterialTheme.colors.background
     ) {
-
-        HorizontalPager(count = 3, state = pagerState) {page ->
+        HorizontalPager(count = 3, state = pagerState) { page ->
             when (page) {
                 0 -> {
                     ScanScreen(camera)
@@ -75,34 +61,32 @@ fun BottomNavigationBar(
         backgroundColor = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.onBackground
     ) {
-
-        if(currentRoute.value != pagerState.currentPage) {
-
+        if (currentRoute.value != pagerState.currentPage) {
             if (pagerState.currentPage == 0)
                 camera.openCamera()
             else
                 camera.closeCamera()
-
             previousRoute.value = currentRoute.value
         }
         currentRoute.value = pagerState.currentPage
         val scope = rememberCoroutineScope()
-
-
         BackHandler(enabled = currentRoute.value != 1) {
-            scope.launch{
+            scope.launch {
                 if (previousRoute.value != currentRoute.value) {
                     pagerState.animateScrollToPage(previousRoute.value)
                     currentRoute.value = previousRoute.value
-                }
-                else
+                } else
                     pagerState.animateScrollToPage(1)
             }
         }
-
         items.forEach { item ->
             BottomNavigationItem(
-                icon = { Icon(painterResource(id = item.icon), contentDescription = stringResource(id = item.title)) },
+                icon = {
+                    Icon(
+                        painterResource(id = item.icon),
+                        contentDescription = stringResource(id = item.title)
+                    )
+                },
                 label = { Text(text = stringResource(id = item.title)) },
                 alwaysShowLabel = true,
                 selected = currentRoute.value == item.route,

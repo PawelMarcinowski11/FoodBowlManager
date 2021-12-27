@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.launch
-import marcinowski.pawel.foodmanager.*
 import marcinowski.pawel.foodmanager.R
 import marcinowski.pawel.foodmanager.data_capturing.Camera
 import marcinowski.pawel.foodmanager.data_capturing.ImageProcessing
@@ -40,18 +39,16 @@ import marcinowski.pawel.foodmanager.utils.ProductParameters
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+enum class Mode {Add, Edit}
 
 @Composable
 fun ScanScreen(camera: Camera) {
-
     val productParameters = ProductParameters()
     val context = LocalContext.current
-    val coroutineScope= rememberCoroutineScope()
-
-
+    val coroutineScope = rememberCoroutineScope()
 
     BackgroundCamera(camera, productParameters)
-    Column() {
+    Column {
         Card(
             shape = RectangleShape,
             modifier = Modifier
@@ -83,14 +80,13 @@ fun ScanScreen(camera: Camera) {
 
                         val year = productParameters.expiryDate.value.substringAfterLast('.')
 
-                        if (year.length == 2) {
-                            parsedDate = LocalDate.parse(
+                        parsedDate = if (year.length == 2) {
+                            LocalDate.parse(
                                 productParameters.expiryDate.value,
                                 DateTimeFormatter.ofPattern("d.M.yy")
                             )
-                        }
-                        else {
-                            parsedDate = LocalDate.parse(
+                        } else {
+                            LocalDate.parse(
                                 productParameters.expiryDate.value,
                                 DateTimeFormatter.ofPattern("d.M.yyyy")
                             )
@@ -120,8 +116,6 @@ fun ScanScreen(camera: Camera) {
     }
 }
 
-enum class Mode {Add, Edit}
-
 @Composable
 fun InputsCard(params: ProductParameters, mode: Mode, onClick: () -> Unit) {
     Card(
@@ -134,14 +128,14 @@ fun InputsCard(params: ProductParameters, mode: Mode, onClick: () -> Unit) {
         ) {
             Column {
                 NameField(params)
-                BarcodeField(params, mode)
+                BarcodeField(params)
                 ExpiryDateField(params)
             }
             Column(
                 modifier = Modifier.align(Alignment.Bottom)
             ) {
                 AutoCompleteSwitch(params)
-                SaveButton(params, mode, onClick)
+                SaveButton(mode, onClick)
             }
         }
     }
@@ -152,7 +146,7 @@ private fun BackgroundCamera(
     camera: Camera,
     params: ProductParameters
 ) {
-    Box() {
+    Box{
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -168,14 +162,11 @@ private fun BackgroundCamera(
             factory = { context: Context ->
                 val view = LayoutInflater.from(context)
                     .inflate(R.layout.camera_view, null, false)
-
-                var textureView = view.findViewById<View>(R.id.texture) as TextureView
-
-                if (textureView.isAvailable == false) {
+                val textureView = view.findViewById<View>(R.id.texture) as TextureView
+                if (!textureView.isAvailable) {
                     camera.textureViewRef = textureView
                     textureView.surfaceTextureListener = ImageProcessing(textureView, params, context).textureListener
                 }
-
                 view
             },
             modifier = Modifier
@@ -204,9 +195,8 @@ private fun NameField(productParameters: ProductParameters) {
 }
 
 @Composable
-private fun BarcodeField(productParameters: ProductParameters, mode: Mode) {
+private fun BarcodeField(productParameters: ProductParameters) {
     val context = LocalContext.current
-
 
     val barcodesListState = (Barcodes(context).getBarcodes().collectAsState(
         initial = null)
@@ -218,7 +208,7 @@ private fun BarcodeField(productParameters: ProductParameters, mode: Mode) {
             val barcodeFormat = """\A\d{0,13}\Z"""
             if (Regex(barcodeFormat).matches(it)) {
                 productParameters.barcodeNumber.value = it
-                if (productParameters.autoComplete.value == true) {
+                if (productParameters.autoComplete.value) {
                     val newNumber = it
                     val existingBarcode = barcodesListState.value?.find {it.number == newNumber}
                     if (existingBarcode != null) {
@@ -229,7 +219,7 @@ private fun BarcodeField(productParameters: ProductParameters, mode: Mode) {
                             productParameters.barcodeNumber.value,
                             productParameters.productName,
                             context
-                        );
+                        )
                     }
                 }
             }
@@ -296,7 +286,7 @@ private fun ExpiryDateField(productParameters: ProductParameters) {
 }
 
 @Composable
-fun SaveButton(productParameters: ProductParameters, mode: Mode, onClickEvent: () -> Unit) {
+fun SaveButton(mode: Mode, onClickEvent: () -> Unit) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(40.dp)
@@ -323,8 +313,8 @@ fun SlimTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    leadingIcon: @Composable() (() -> Unit)? = null,
-    trailingIcon: @Composable() (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     placeholderText: String,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,

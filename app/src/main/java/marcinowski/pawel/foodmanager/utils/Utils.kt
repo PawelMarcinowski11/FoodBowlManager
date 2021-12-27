@@ -18,11 +18,9 @@ data class Product(
     val barcodeNumber: String,
     val id: UUID,
     val expiryDate: LocalDate? = null
-) {
-}
+)
 
 data class Barcode(
     var name: String,
     val number: String
-) {
-}
+)

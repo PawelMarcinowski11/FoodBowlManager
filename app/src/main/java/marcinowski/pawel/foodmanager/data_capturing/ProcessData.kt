@@ -25,5 +25,4 @@ fun lookUpProductName (barcode: String, productName: MutableState<String>, conte
             e.printStackTrace()
         }
     }
-
 }

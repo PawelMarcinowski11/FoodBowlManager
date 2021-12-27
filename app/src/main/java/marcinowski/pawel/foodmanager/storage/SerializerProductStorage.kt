@@ -18,7 +18,6 @@ import java.util.*
 
 object SerializerProductStorage : Serializer<ProductStorage> {
     override val defaultValue: ProductStorage = ProductStorage.getDefaultInstance()
-
     override suspend fun readFrom(input: InputStream): ProductStorage {
         try {
             return ProductStorage.parseFrom(input)
@@ -26,13 +25,11 @@ object SerializerProductStorage : Serializer<ProductStorage> {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
-
     override suspend fun writeTo(t: ProductStorage, output: OutputStream) = t.writeTo(output)
 }
 
 
 class Products(private val context: Context) {
-
     companion object {
         private val Context.productProtoDataStore: DataStore<ProductStorage> by dataStore(
             fileName = "products.pb",
@@ -40,15 +37,9 @@ class Products(private val context: Context) {
         )
     }
 
-    suspend fun clearProducts() {
-        context.productProtoDataStore.updateData { data -> data.toBuilder().clearEntries().build() }
-    }
-
     fun getProducts(): Flow<List<Product>> {
-
         return context.productProtoDataStore.data.map { products ->
             val productList: MutableList<Product> = mutableListOf()
-
             products.entriesList.forEach {
                 productList.add(
                     Product(
@@ -59,9 +50,7 @@ class Products(private val context: Context) {
                     )
                 )
             }
-
             productList.sortBy { product -> product.expiryDate }
-
             productList
         }
     }
@@ -107,5 +96,9 @@ class Products(private val context: Context) {
             else
                 productsStorage
         }
+    }
+
+    suspend fun clearProducts() {
+        context.productProtoDataStore.updateData { data -> data.toBuilder().clearEntries().build() }
     }
 }

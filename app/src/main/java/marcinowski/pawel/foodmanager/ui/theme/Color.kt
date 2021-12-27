@@ -2,7 +2,11 @@ package marcinowski.pawel.foodmanager.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
+val Cactus = Color(0xFF68996E)
+val PaleCactus = Color(0xFFEAFBAA)
+val CharredDough = Color(0xFF2C1106)
+val Dough = Color(0xFF5C4126)
+val PaleDough = Color(0xFFFEFDFA)
+val CharredAsh = Color (0xFF090606)
+val Ash = Color (0xFF8E8383)
+val WhiteAsh = Color (0xFFD8D3D3)
