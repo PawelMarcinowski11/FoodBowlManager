@@ -195,7 +195,7 @@ fun ProductList(
                     .fillMaxWidth()
                     .fillMaxHeight(1.0f)
             ) {
-                items(items = productList.value ?: listOf(), key = { index -> index.id }) { item ->
+                items(items = productList.value ?: listOf(), key = { product -> product.id }) { item ->
                     val animVisibleState = remember { MutableTransitionState(initialState.value) }
                         .apply { targetState = true }
                     AnimatedVisibility(
