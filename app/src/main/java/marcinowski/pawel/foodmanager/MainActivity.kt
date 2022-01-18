@@ -33,6 +33,10 @@ import java.util.*
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
+/**
+ * Main activity
+ *
+ */
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPagerApi::class)
     var pagerState: PagerState? = null
@@ -60,6 +64,10 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermissionsFor(arrayListOf(UserPermission.CAMERA, UserPermission.WRITE_DATA))
     }
 
+    /**
+     * Enum class listing the user permissions used by the application
+     *
+     */
     enum class UserPermission{
         CAMERA,
         WRITE_DATA

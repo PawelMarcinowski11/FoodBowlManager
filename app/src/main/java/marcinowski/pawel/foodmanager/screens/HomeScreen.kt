@@ -36,6 +36,10 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+/**
+ * Home screen, containing the product list
+ *
+ */
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -134,6 +138,10 @@ fun HomeScreen() {
     )
 }
 
+/**
+ * Product list
+ *
+ */
 @SuppressLint("CoroutineCreationDuringComposition", "UnrememberedMutableState")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable

@@ -29,6 +29,10 @@ object SerializerProductStorage : Serializer<ProductStorage> {
 }
 
 
+/**
+ * Class responsible for storing and retrieving products
+ *
+ */
 class Products(private val context: Context) {
     companion object {
         private val Context.productProtoDataStore: DataStore<ProductStorage> by dataStore(
@@ -37,6 +41,10 @@ class Products(private val context: Context) {
         )
     }
 
+    /**
+     * Retrieve product list
+     *
+     */
     fun getProducts(): Flow<List<Product>> {
         return context.productProtoDataStore.data.map { products ->
             val productList: MutableList<Product> = mutableListOf()
@@ -55,6 +63,10 @@ class Products(private val context: Context) {
         }
     }
 
+    /**
+     * Save product entry
+     *
+     */
     suspend fun saveProduct(name: String, number: String, date: LocalDate) {
         context.productProtoDataStore.updateData { productsStorage ->
             productsStorage.toBuilder()
@@ -70,6 +82,10 @@ class Products(private val context: Context) {
         }
     }
 
+    /**
+     * Update product entry
+     *
+     */
     suspend fun updateProduct(name: String, number: String, id: UUID, date: LocalDate) {
         context.productProtoDataStore.updateData { productsStorage ->
             val foundProduct = productsStorage.entriesList.find { it.id == id.toString() }
@@ -85,6 +101,10 @@ class Products(private val context: Context) {
         }
     }
 
+    /**
+     * Remove product entry
+     *
+     */
     suspend fun removeProduct(id: UUID) {
         context.productProtoDataStore.updateData { productsStorage ->
             val foundProduct = productsStorage.entriesList.find { it.id == id.toString() }
@@ -98,6 +118,10 @@ class Products(private val context: Context) {
         }
     }
 
+    /**
+     * Clear all product entries
+     *
+     */
     suspend fun clearProducts() {
         context.productProtoDataStore.updateData { data -> data.toBuilder().clearEntries().build() }
     }

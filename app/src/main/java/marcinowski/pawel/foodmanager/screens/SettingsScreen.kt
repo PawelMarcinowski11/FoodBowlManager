@@ -22,6 +22,10 @@ import marcinowski.pawel.foodmanager.R
 import marcinowski.pawel.foodmanager.dataStore
 import marcinowski.pawel.foodmanager.notifications.FoodNotifications
 
+/**
+ * Settings screen, responsible for customizing notifications and theme
+ *
+ */
 @Composable
 fun SettingsScreen(darkTheme: MutableState<Boolean>) {
     Column (

@@ -39,8 +39,18 @@ import marcinowski.pawel.foodmanager.utils.ProductParameters
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-enum class Mode {Add, Edit}
+/**
+ * Enum class indicating which input mode has been chosen
+ *
+ */
+enum class Mode {
+    Add,
+    Edit}
 
+/**
+ * Scan screen, containing camera preview and product parameter's text fields
+ *
+ */
 @Composable
 fun ScanScreen(camera: Camera) {
     val productParameters = ProductParameters()
@@ -116,6 +126,10 @@ fun ScanScreen(camera: Camera) {
     }
 }
 
+/**
+ * Inputs card containing name field, barcode field, expiry date field, autocomplete switch and save button
+ *
+ */
 @Composable
 fun InputsCard(params: ProductParameters, mode: Mode, onClick: () -> Unit) {
     Card(
@@ -285,6 +299,10 @@ private fun ExpiryDateField(productParameters: ProductParameters) {
     )
 }
 
+/**
+ * Save button
+ *
+ */
 @Composable
 fun SaveButton(mode: Mode, onClickEvent: () -> Unit) {
     Box(modifier = Modifier
@@ -308,6 +326,10 @@ fun SaveButton(mode: Mode, onClickEvent: () -> Unit) {
     }
 }
 
+/**
+ * Custom text field, slimmer than the default one
+ *
+ */
 @Composable
 fun SlimTextField(
     value: String,

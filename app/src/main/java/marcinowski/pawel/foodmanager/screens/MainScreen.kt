@@ -15,6 +15,10 @@ import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import marcinowski.pawel.foodmanager.data_capturing.Camera
 
+/**
+ * Main screen, containing all three panels and the logic of navigating between them
+ *
+ */
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun MainScreen(
@@ -44,6 +48,10 @@ fun MainScreen(
     }
 }
 
+/**
+ * Bottom navigation bar, containing clickable icons of Scan screen, Home screen and Settings screen
+ *
+ */
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun BottomNavigationBar(

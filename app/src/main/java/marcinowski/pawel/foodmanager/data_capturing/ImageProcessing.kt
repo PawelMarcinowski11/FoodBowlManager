@@ -17,6 +17,10 @@ import kotlinx.coroutines.sync.Semaphore
 import marcinowski.pawel.foodmanager.storage.Barcodes
 import marcinowski.pawel.foodmanager.utils.ProductParameters
 
+/**
+ * Image processing class, handling data retrieval from images provided by camera
+ *
+ */
 class ImageProcessing(
     private var textureViewRef: TextureView?,
     productParameters: ProductParameters,

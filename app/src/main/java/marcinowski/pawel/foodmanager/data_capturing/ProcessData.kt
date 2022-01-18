@@ -11,6 +11,10 @@ import java.net.URL
 import kotlin.concurrent.thread
 
 
+/**
+ * Look up product name in the web database
+ *
+ */
 fun lookUpProductName (barcode: String, productName: MutableState<String>, context: Context) {
     thread {
         try {

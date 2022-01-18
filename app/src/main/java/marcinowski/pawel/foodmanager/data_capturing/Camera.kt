@@ -16,6 +16,10 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import marcinowski.pawel.foodmanager.MainActivity
 
+/**
+ * Camera class, handling opening and closing the camera, as well as streaming its output to the texture view
+ *
+ */
 class Camera(
     private var activity: MainActivity,
     private var context: Context
@@ -32,6 +36,10 @@ class Camera(
 
     var textureViewRef: TextureView? = null
 
+    /**
+     * Open camera
+     *
+     */
     fun openCamera() {
         val manager = context.getSystemService(ComponentActivity.CAMERA_SERVICE) as CameraManager
 
@@ -67,6 +75,10 @@ class Camera(
         textureViewRef?.alpha = 1.0f
     }
 
+    /**
+     * Close camera
+     *
+     */
     fun closeCamera() {
         textureViewRef?.alpha = 0f
         if (null != cameraDevice) {

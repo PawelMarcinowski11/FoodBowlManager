@@ -24,6 +24,10 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
+/**
+ * Food notifications class, handling scheduling and sending Android notifications
+ *
+ */
 class FoodNotifications : BroadcastReceiver() {
 
     private val REQUEST_LOCK_SCREEN_PERMISSION = 300
@@ -34,6 +38,10 @@ class FoodNotifications : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Set notifications scheduled at the provided time of day
+     *
+     */
     fun setNotifications(context: Context, hourTime: Int) {
         if (ActivityCompat.checkSelfPermission(
                 context,
@@ -140,6 +148,10 @@ class FoodNotifications : BroadcastReceiver() {
         notificationManager.notify(2, notificationBuilder.build())
     }
 
+    /**
+     * Cancel scheduled notifications
+     *
+     */
     fun cancelNotifications(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()

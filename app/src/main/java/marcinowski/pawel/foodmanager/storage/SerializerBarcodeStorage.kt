@@ -27,6 +27,10 @@ object SerializerBarcodeStorage : Serializer<BarcodeStorage> {
 }
 
 
+/**
+ * Class responsible for storing and retrieving barcodes
+ *
+ */
 class Barcodes(private val context: Context) {
 
     companion object {
@@ -36,6 +40,10 @@ class Barcodes(private val context: Context) {
         )
     }
 
+    /**
+     * Retrieve barcodes list
+     *
+     */
     fun getBarcodes(): Flow<List<Barcode>> {
         return context.barcodeProtoDataStore.data.map { barcodes ->
             val barcodeList: MutableList<Barcode> = mutableListOf()
@@ -51,6 +59,10 @@ class Barcodes(private val context: Context) {
         }
     }
 
+    /**
+     * Save barcode entry
+     *
+     */
     suspend fun saveBarcode(name: String, number: String) {
         context.barcodeProtoDataStore.updateData { barcodeStorage ->
             barcodeStorage.toBuilder()
@@ -64,6 +76,10 @@ class Barcodes(private val context: Context) {
         }
     }
 
+    /**
+     * Update barcode entry
+     *
+     */
     suspend fun updateBarcode(name: String, number: String) {
         context.barcodeProtoDataStore.updateData { barcodeStorage ->
             val foundBarcode = barcodeStorage.entriesList.find { it.barcodeNumber == number }
@@ -77,6 +93,10 @@ class Barcodes(private val context: Context) {
         }
     }
 
+    /**
+     * Clear all barcode entries
+     *
+     */
     suspend fun clearBarcodes() {
         context.barcodeProtoDataStore.updateData { data -> data.toBuilder().clearEntries().build() }
     }
